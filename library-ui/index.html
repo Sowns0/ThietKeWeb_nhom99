@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Thư viện số</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<script>
+  "use strict";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const API_BASE =
+      window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+        ? "http://127.0.0.1:3000"
+        : "https://laughing-space-happiness-4j549v75g7rqh5gpr-3000.app.github.dev";
+
+    const loginForm = document.getElementById("loginForm");
+    const loginView = document.getElementById("loginView");
+    const protectedApp = document.getElementById("protectedApp");
+    const usernameInput = document.getElementById("loginEmail");
+    const passwordInput = document.getElementById("loginPassword");
+    const rememberMe = document.getElementById("rememberMe");
+    const loginButton = document.getElementById("loginButton");
+    const loginMessage = document.getElementById("loginMessage");
+    const logoutButton = document.getElementById("logoutButton");
+    const userName = document.getElementById("userName");
+    const userEmail = document.getElementById("userEmail");
+    const userInitials = document.getElementById("userInitials");
+    const authToast = document.getElementById("authToast");
+
+    function showProtectedApp() {
+      loginView?.classList.add("is-hidden");
+      loginView?.setAttribute("aria-hidden", "true");
+      loginView?.style.setProperty("display", "none");
+
+      protectedApp?.classList.remove("is-hidden");
+      protectedApp?.setAttribute("aria-hidden", "false");
+      protectedApp?.style.removeProperty("display");
+      protectedApp?.style.setProperty("display", "flex");
+
+      document.body.style.overflow = "";
+      document.title = "Thư viện số";
+    }
+
+    function showLoginScreen() {
+      protectedApp?.classList.add("is-hidden");
+      protectedApp?.setAttribute("aria-hidden", "true");
+      protectedApp?.style.setProperty("display", "none");
+
+      loginView?.classList.remove("is-hidden");
+      loginView?.setAttribute("aria-hidden", "false");
+      loginView?.style.removeProperty("display");
+
+      document.body.style.overflow = "";
+      document.title = "Đăng nhập | Thư viện số";
+    }
+
+    function setMessage(message) {
+      if (loginMessage) {
+        loginMessage.textContent = message;
+      }
+    }
+
+    loginView?.classList.remove("auth-page--checking");
+    loginForm?.addEventListener("submit", login);
+
+    async function login(event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const username = usernameInput?.value?.trim() || "";
+      const password = passwordInput?.value || "";
+
+      setMessage("");
+
+      if (!username || !password) {
+        setMessage("Hãy nhập đầy đủ tên đăng nhập và mật khẩu.");
+        return;
+      }
+
+      if (loginButton) {
+        loginButton.disabled = true;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/auth/login`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        let data = {};
+        try {
+          data = await response.json();
+        } catch {
+          data = {};
+        }
+
+        if (!response.ok) {
+          const message = Array.isArray(data.message)
+            ? data.message.join(". ")
+            : data.message || "Đăng nhập không thành công.";
+          throw new Error(message);
+        }
+
+        if (!data.access_token) {
+          throw new Error("Backend không trả về access_token.");
+        }
+
+        if (rememberMe?.checked) {
+          localStorage.setItem("library:last-username", username);
+        } else {
+          localStorage.removeItem("library:last-username");
+        }
+
+        if (passwordInput) passwordInput.value = "";
+        if (userName) userName.textContent = username;
+        if (userEmail) userEmail.textContent = "Tài khoản độc giả";
+        if (userInitials) userInitials.textContent = username.slice(0, 2).toUpperCase();
+
+        if (authToast) {
+          authToast.textContent = "Đăng nhập thành công";
+          authToast.classList.add("is-visible");
+          clearTimeout(window.loginToastTimer);
+          window.loginToastTimer = setTimeout(() => authToast.classList.remove("is-visible"), 2200);
+        }
+
+        showProtectedApp();
+      } catch (error) {
+        console.error(error);
+        setMessage(error instanceof Error ? error.message : "Không thể kết nối tới máy chủ.");
+      } finally {
+        if (loginButton) {
+          loginButton.disabled = false;
+        }
+      }
+    }
+
+    logoutButton?.addEventListener("click", () => {
+      showLoginScreen();
+      if (passwordInput) passwordInput.value = "";
+    });
+
+    const savedUsername = localStorage.getItem("library:last-username");
+    if (savedUsername && usernameInput) {
+      usernameInput.value = savedUsername;
+      if (rememberMe) rememberMe.checked = true;
+    }
+  });
+</script>
+
+<body>
+
+  <!-- MÀN HÌNH ĐĂNG NHẬP -->
+  <section class="auth-page" id="loginView" aria-labelledby="loginTitle">
+    <div class="auth-page__visual">
+      <a href="#" class="auth-brand">
+        <span class="auth-brand__logo" aria-hidden="true">📚</span>
+
+        <span>
+          <strong>THƯ VIỆN SỐ</strong>
+          <small>Library Portal</small>
+        </span>
+      </a>
+
+      <div class="auth-introduction">
+        <span class="auth-badge">CHÀO MỪNG</span>
+
+        <h1>Truy cập kho tài liệu số lớn nhất</h1>
+
+        <p>
+          Đăng nhập để khám phá hàng ngàn cuốn sách điện tử, tạp chí học thuật
+          và tài liệu tham khảo chất lượng cao từ thư viện.
+        </p>
+
+        <ul class="auth-benefits">
+          <li>
+            <span>✓</span>
+            Truy cập không giới hạn vào kho sách số
+          </li>
+          <li>
+            <span>✓</span>
+            Tải xuống tài liệu và lưu danh sách yêu thích
+          </li>
+          <li>
+            <span>✓</span>
+            Đồng bộ hóa giữa các thiết bị
+          </li>
+        </ul>
+      </div>
+
+      <p class="auth-page__copyright">© 2026 Thư viện số</p>
+    </div>
+
+    <div class="auth-page__form-side">
+      <form
+        class="login-card"
+        id="loginForm"
+        novalidate
+      >
+        <div class="login-card__checking" id="sessionChecking">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <strong>Đang kiểm tra phiên đăng nhập...</strong>
+        </div>
+
+        <div class="login-card__content">
+          <p class="eyebrow">CHÀO MỪNG TRỞ LẠI</p>
+          <h2 id="loginTitle">Đăng nhập tài khoản</h2>
+          <p class="login-card__description">
+            Sử dụng tài khoản được thư viện cấp để tiếp tục.
+          </p>
+
+          <label class="auth-field" for="loginEmail">
+            <span>Tên đăng nhập</span>
+            <span class="auth-field__control">
+              <i aria-hidden="true">♙</i>
+              <input id="loginEmail" name="username" required />
+            </span>
+          </label>
+
+          <label class="auth-field" for="loginPassword">
+            <span>Mật khẩu</span>
+            <span class="auth-field__control">
+              <i aria-hidden="true">⌑</i>
+              <input id="loginPassword" name="password" type="password" required />
+              <button class="password-toggle" type="button" aria-label="Hiện mật khẩu">
+                👁
+              </button>
+            </span>
+          </label>
+
+          <div class="login-options">
+            <label class="remember-option">
+              <input id="rememberMe" name="rememberMe" type="checkbox" checked />
+              <span>Ghi nhớ đăng nhập trên thiết bị này</span>
+            </label>
+
+            <a href="mailto:thuvien@example.edu.vn?subject=Yêu cầu đặt lại mật khẩu">
+              Quên mật khẩu?
+            </a>
+          </div>
+
+          <div class="login-card__assist">
+            <span aria-hidden="true">🛡️</span>
+            <div>
+              <strong>Đăng nhập an toàn</strong>
+              <p>Chỉ sử dụng thiết bị đáng tin cậy và không chia sẻ mật khẩu.</p>
+            </div>
+          </div>
+
+          <button class="login-submit" id="loginButton" type="submit">
+            <span class="login-submit__text">Đăng nhập</span>
+            <span class="login-submit__spinner loading-spinner" aria-hidden="true"></span>
+          </button>
+
+          <p class="login-message" id="loginMessage" role="alert" aria-live="polite"></p>
+
+          <div class="security-note">
+            <span aria-hidden="true">◆</span>
+            <p>
+              Chỉ đăng nhập trên thiết bị đáng tin cậy. Thư viện không bao giờ
+              yêu cầu bạn gửi mật khẩu qua email hoặc tin nhắn.
+            </p>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <div class="library-layout app-protected is-hidden" id="protectedApp" aria-hidden="true" hidden style="display: none;">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand__logo" aria-hidden="true">📚</span>
+        <div class="brand__text">
+          <strong>THƯ VIỆN SỐ</strong>
+          <small>Library Portal</small>
+        </div>
+      </div>
+
+      <div class="sidebar__menu">
+        <p class="sidebar__label">CHỨC NĂNG</p>
+        <a href="#" class="menu-item menu-item--active">
+          <span class="menu-item__icon">i</span>
+          <span class="menu-item__text">
+            <strong>Thông tin</strong>
+            <small>Thông tin tài khoản</small>
+          </span>
+        </a>
+        <a href="#" class="menu-item">
+          <span class="menu-item__icon">★</span>
+          <span class="menu-item__text">
+            <strong>Sách hot</strong>
+            <small>Những sách được quan tâm</small>
+          </span>
+        </a>
+        <a href="#" class="menu-item">
+          <span class="menu-item__icon">📍</span>
+          <span class="menu-item__text">
+            <strong>Địa chỉ</strong>
+            <small>Thông tin chi nhánh</small>
+          </span>
+        </a>
+      </div>
+
+      <div class="sidebar__footer">
+        <div class="support-box">
+          <span class="support-box__icon">?</span>
+          <span>
+            <strong>Hỗ trợ</strong>
+            <small>Liên hệ khi cần</small>
+          </span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="top-header">
+        <div>
+          <p class="eyebrow">KHO THƯ VIỆN</p>
+          <h1>Chào mừng bạn</h1>
+          <p class="top-header__description">Chọn chức năng bên trái để xem thông tin tài khoản, sách hot và địa chỉ.</p>
+        </div>
+
+        <div class="top-header__actions">
+          <button class="header-button" type="button" aria-label="Thông báo">🔔</button>
+          <button class="user-button" type="button" aria-label="Người dùng">
+            <span class="user-button__avatar" id="userInitials">TV</span>
+            <span class="user-button__info">
+              <strong id="userName">Độc giả</strong>
+              <small id="userEmail">Tài khoản độc giả</small>
+            </span>
+          </button>
+          <button class="header-button" id="logoutButton" type="button">⇦</button>
+        </div>
+      </div>
+
+      <section class="hero-block">
+        <div class="hero-block__content">
+          <p class="hero-block__badge">GIAO DIỆN</p>
+          <h2>Trang chức năng</h2>
+          <p>Giao diện được chia thành thanh menu trái và nội dung chính bên phải.</p>
+        </div>
+        <div class="hero-block__buttons">
+          <a class="primary-button" href="#">Xem sách mới</a>
+          <a class="secondary-button" href="#">Xem địa chỉ</a>
+        </div>
+      </section>
+
+      <section class="library-grid">
+        <article class="book-card">
+          <h3>Thông tin</h3>
+          <p>Chi tiết tài khoản và thông báo.</p>
+        </article>
+        <article class="book-card">
+          <h3>Sách hot</h3>
+          <p>Những đầu sách được quan tâm nhất.</p>
+        </article>
+        <article class="book-card">
+          <h3>Địa chỉ</h3>
+          <p>Thông tin chi nhánh hiện có.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="auth-toast" id="authToast" role="status" aria-live="polite"></div>
+</body>
+</html>
