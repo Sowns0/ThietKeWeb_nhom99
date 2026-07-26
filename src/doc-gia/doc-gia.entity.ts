@@ -1,11 +1,16 @@
-export interface DocGia {
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
+@Entity('doc_gia')
+export class DocGia {
+  @PrimaryGeneratedColumn()
   id: number;
+
+  @Column()
   ho_ten: string;
+
+  @Column({ nullable: true })
   email: string;
-  so_dien_thoai?: string | null;
-  created_at?: string;
+
+  @Column({ name: 'so_dien_thoai', nullable: true })
+  so_dien_thoai: string;
 }
-
-export type CreateDocGiaDto = Omit<DocGia, 'id' | 'created_at'>;
-
-export type UpdateDocGiaDto = Partial<CreateDocGiaDto>;

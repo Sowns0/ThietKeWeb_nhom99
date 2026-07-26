@@ -13,6 +13,12 @@ const typeorm_1 = require("@nestjs/typeorm");
 const auth_module_1 = require("./auth/auth.module");
 const user_module_1 = require("./user/user.module");
 const user_entity_1 = require("./user/user.entity");
+const sach_module_1 = require("./sach/sach.module");
+const sach_entity_1 = require("./sach/sach.entity");
+const phieu_muon_module_1 = require("./phieu-muon/phieu-muon.module");
+const phieu_muon_entity_1 = require("./phieu-muon/phieu-muon.entity");
+const doc_gia_module_1 = require("./doc-gia/doc-gia.module");
+const doc_gia_entity_1 = require("./doc-gia/doc-gia.entity");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -26,11 +32,14 @@ exports.AppModule = AppModule = __decorate([
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'better-sqlite3',
                 database: process.env.DB_DATABASE ?? 'db.sqlite',
-                entities: [user_entity_1.User],
+                entities: [user_entity_1.User, sach_entity_1.Sach, phieu_muon_entity_1.PhieuMuon, doc_gia_entity_1.DocGia],
                 synchronize: process.env.NODE_ENV !== 'production',
             }),
             user_module_1.UserModule,
             auth_module_1.AuthModule,
+            sach_module_1.SachModule,
+            phieu_muon_module_1.PhieuMuonModule,
+            doc_gia_module_1.DocGiaModule,
         ],
     })
 ], AppModule);

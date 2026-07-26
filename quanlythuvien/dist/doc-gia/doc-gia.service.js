@@ -1,48 +1,53 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.defaultDocGiaService = exports.DocGiaService = void 0;
-class DocGiaService {
-    items = [];
-    nextId = 1;
-    create(dto) {
-        const item = {
-            id: this.nextId++,
-            ho_ten: dto.ho_ten,
-            email: dto.email,
-            so_dien_thoai: dto.so_dien_thoai ?? null,
-            created_at: new Date().toISOString(),
-        };
-        this.items.push(item);
-        return item;
+exports.DocGiaService = void 0;
+const common_1 = require("@nestjs/common");
+const typeorm_1 = require("@nestjs/typeorm");
+const typeorm_2 = require("typeorm");
+const doc_gia_entity_1 = require("./doc-gia.entity");
+let DocGiaService = class DocGiaService {
+    docGiaRepository;
+    constructor(docGiaRepository) {
+        this.docGiaRepository = docGiaRepository;
     }
     findAll() {
-        return [...this.items];
+        return this.docGiaRepository.find();
     }
-    findOne(id) {
-        return this.items.find((i) => i.id === id);
+    async findOne(id) {
+        const dg = await this.docGiaRepository.findOne({ where: { id } });
+        if (!dg)
+            throw new common_1.NotFoundException(`Không tìm thấy độc giả ID ${id}`);
+        return dg;
     }
-    update(id, dto) {
-        const idx = this.items.findIndex((i) => i.id === id);
-        if (idx === -1)
-            return undefined;
-        const existing = this.items[idx];
-        const updated = {
-            ...existing,
-            ho_ten: dto.ho_ten ?? existing.ho_ten,
-            email: dto.email ?? existing.email,
-            so_dien_thoai: dto.so_dien_thoai ?? existing.so_dien_thoai,
-        };
-        this.items[idx] = updated;
-        return updated;
+    create(data) {
+        return this.docGiaRepository.save(data);
     }
-    remove(id) {
-        const idx = this.items.findIndex((i) => i.id === id);
-        if (idx === -1)
-            return false;
-        this.items.splice(idx, 1);
-        return true;
+    async update(id, data) {
+        await this.findOne(id);
+        await this.docGiaRepository.update(id, data);
+        return this.findOne(id);
     }
-}
+    async remove(id) {
+        await this.findOne(id);
+        return this.docGiaRepository.delete(id);
+    }
+};
 exports.DocGiaService = DocGiaService;
-exports.defaultDocGiaService = new DocGiaService();
+exports.DocGiaService = DocGiaService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(doc_gia_entity_1.DocGia)),
+    __metadata("design:paramtypes", [typeorm_2.Repository])
+], DocGiaService);
 //# sourceMappingURL=doc-gia.service.js.map

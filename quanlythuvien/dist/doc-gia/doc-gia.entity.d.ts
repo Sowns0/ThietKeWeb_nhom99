@@ -1,9 +1,6 @@
-export interface DocGia {
+export declare class DocGia {
     id: number;
     ho_ten: string;
     email: string;
-    so_dien_thoai?: string | null;
-    created_at?: string;
+    so_dien_thoai: string;
 }
-export type CreateDocGiaDto = Omit<DocGia, 'id' | 'created_at'>;
-export type UpdateDocGiaDto = Partial<CreateDocGiaDto>;

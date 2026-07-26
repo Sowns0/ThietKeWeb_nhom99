@@ -20,10 +20,29 @@
   "use strict";
 
   document.addEventListener("DOMContentLoaded", () => {
-    const API_BASE =
-      window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
-        ? "http://127.0.0.1:3000"
-        : "https://laughing-space-happiness-4j549v75g7rqh5gpr-3000.app.github.dev";
+    // Determine API base depending on environment to avoid mixed-content
+    let API_BASE = "http://127.0.0.1:3000";
+
+    if (
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "0.0.0.0" ||
+      window.location.hostname === "::1" ||
+      window.location.hostname === "[::1]"
+    ) {
+      API_BASE = "http://127.0.0.1:3000";
+    } else if (location.protocol === "https:" && location.hostname.endsWith(".app.github.dev")) {
+      // In Codespaces / GitHub.dev preview the hostname is like <name>-8000.app.github.dev
+      // replace the port suffix (e.g. -8000) with -3000 to reach the forwarded backend
+      const host = location.hostname.replace(/-(\d+)\./, '-3000.');
+      API_BASE = `${location.protocol}//${host}`;
+    } else if (location.protocol === "https:") {
+      // Default to same-origin https (best effort)
+      API_BASE = `${location.protocol}//${location.hostname}:3000`;
+    }
+
+    // Expose for debugging in DevTools
+    window.API_BASE = API_BASE;
 
     const loginForm = document.getElementById("loginForm");
     const loginView = document.getElementById("loginView");
@@ -155,11 +174,41 @@
       if (passwordInput) passwordInput.value = "";
     });
 
+    // Password visibility toggle
+    const passwordToggle = document.querySelector('.password-toggle');
+    if (passwordToggle && passwordInput) {
+      passwordToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (passwordInput.type === 'password') {
+          passwordInput.type = 'text';
+          passwordToggle.textContent = '🙈';
+        } else {
+          passwordInput.type = 'password';
+          passwordToggle.textContent = '👁';
+        }
+      });
+    }
+
     const savedUsername = localStorage.getItem("library:last-username");
     if (savedUsername && usernameInput) {
       usernameInput.value = savedUsername;
       if (rememberMe) rememberMe.checked = true;
     }
+
+    // Quick ping to backend to help debug "Failed to fetch" from browser
+    (async () => {
+      try {
+        const resp = await fetch(`${API_BASE}/ping`, { method: 'GET', cache: 'no-store' });
+        if (!resp.ok) throw new Error(`Ping failed ${resp.status}`);
+        const data = await resp.json();
+        console.log('Backend ping:', data);
+      } catch (err) {
+        console.error('Ping error:', err);
+        if (loginMessage) {
+          loginMessage.textContent = 'Không thể kết nối tới backend (ping thất bại). Mở DevTools để biết chi tiết.';
+        }
+      }
+    })();
   });
 </script>
 

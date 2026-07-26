@@ -16,8 +16,8 @@
 
 const API_BASE =
   (typeof window !== "undefined" && window.location ?
-    `${window.location.protocol}//${window.location.hostname}:5000` :
-    "http://127.0.0.1:5000");
+    `${window.location.protocol}//${window.location.hostname}:3000` :
+    "http://127.0.0.1:3000");
 
 console.log("Backend API:", API_BASE);
 

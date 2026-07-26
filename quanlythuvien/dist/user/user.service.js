@@ -68,15 +68,26 @@ let UserService = class UserService {
         return this.userRepository.findOne({ where: { username } });
     }
     async ensureDefaultUser() {
-        const username = process.env.DEFAULT_USERNAME ?? 'admin';
-        const password = process.env.DEFAULT_PASSWORD ?? 'admin123';
-        const existing = await this.userRepository.findOne({ where: { username } });
-        if (existing) {
-            return existing;
+        const defaultUsers = [
+            {
+                username: process.env.DEFAULT_USERNAME ?? 'admin',
+                password: process.env.DEFAULT_PASSWORD ?? 'admin123',
+            },
+            {
+                username: process.env.STUDENT_USERNAME ?? 'son01',
+                password: process.env.STUDENT_PASSWORD ?? '12345678',
+            },
+        ];
+        for (const { username, password } of defaultUsers) {
+            const existing = await this.userRepository.findOne({ where: { username } });
+            if (existing) {
+                continue;
+            }
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const user = this.userRepository.create({ username, password: hashedPassword });
+            await this.userRepository.save(user);
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = this.userRepository.create({ username, password: hashedPassword });
-        return this.userRepository.save(user);
+        return this.userRepository.findOne({ where: { username: defaultUsers[0].username } });
     }
 };
 exports.UserService = UserService;

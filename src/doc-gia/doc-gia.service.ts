@@ -1,49 +1,37 @@
-import { DocGia, CreateDocGiaDto, UpdateDocGiaDto } from './doc-gia.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { DocGia } from './doc-gia.entity';
 
+@Injectable()
 export class DocGiaService {
-  private items: DocGia[] = [];
-  private nextId = 1;
+  constructor(
+    @InjectRepository(DocGia)
+    private readonly docGiaRepository: Repository<DocGia>,
+  ) {}
 
-  create(dto: CreateDocGiaDto): DocGia {
-    const item: DocGia = {
-      id: this.nextId++,
-      ho_ten: dto.ho_ten,
-      email: dto.email,
-      so_dien_thoai: dto.so_dien_thoai ?? null,
-      created_at: new Date().toISOString(),
-    };
-    this.items.push(item);
-    return item;
+  findAll() {
+    return this.docGiaRepository.find();
   }
 
-  findAll(): DocGia[] {
-    return [...this.items];
+  async findOne(id: number) {
+    const dg = await this.docGiaRepository.findOne({ where: { id } });
+    if (!dg) throw new NotFoundException(`Không tìm thấy độc giả ID ${id}`);
+    return dg;
   }
 
-  findOne(id: number): DocGia | undefined {
-    return this.items.find((i) => i.id === id);
+  create(data: Partial<DocGia>) {
+    return this.docGiaRepository.save(data);
   }
 
-  update(id: number, dto: UpdateDocGiaDto): DocGia | undefined {
-    const idx = this.items.findIndex((i) => i.id === id);
-    if (idx === -1) return undefined;
-    const existing = this.items[idx];
-    const updated: DocGia = {
-      ...existing,
-      ho_ten: dto.ho_ten ?? existing.ho_ten,
-      email: dto.email ?? existing.email,
-      so_dien_thoai: dto.so_dien_thoai ?? existing.so_dien_thoai,
-    };
-    this.items[idx] = updated;
-    return updated;
+  async update(id: number, data: Partial<DocGia>) {
+    await this.findOne(id); // 404 nếu không tồn tại
+    await this.docGiaRepository.update(id, data);
+    return this.findOne(id);
   }
 
-  remove(id: number): boolean {
-    const idx = this.items.findIndex((i) => i.id === id);
-    if (idx === -1) return false;
-    this.items.splice(idx, 1);
-    return true;
+  async remove(id: number) {
+    await this.findOne(id); // 404 nếu không tồn tại
+    return this.docGiaRepository.delete(id);
   }
 }
-
-export const defaultDocGiaService = new DocGiaService();
