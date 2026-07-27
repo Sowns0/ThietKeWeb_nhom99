@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const common_1 = require("@nestjs/common");
+``;
 const path_1 = require("path");
 const app_module_1 = require("./app.module");
 const cookieParser = require("cookie-parser");
