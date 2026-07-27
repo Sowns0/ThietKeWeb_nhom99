@@ -56,6 +56,27 @@
     display:none;position:fixed;inset:0;background:rgba(19,27,51,.45);z-index:30;
   }
   .sidebar-backdrop.show{display:block;}
+  .book-modal-backdrop{
+    display:none;position:fixed;inset:0;z-index:50;
+    background:rgba(19,27,51,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+    align-items:center;justify-content:center;padding:20px;
+  }
+  .book-modal-backdrop.show{display:flex;}
+  .book-modal{
+    background:var(--paper,#F7F3EA);border-radius:14px;max-width:420px;width:100%;
+    padding:28px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.35);
+  }
+  .book-modal__close{
+    position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;
+    font-size:18px;color:#8993B5;padding:6px;border-radius:8px;
+  }
+  .book-modal__close:hover{background:rgba(0,0,0,.06);}
+  .book-modal__cover{font-size:34px;margin-bottom:10px;}
+  .book-modal h3{font-size:20px;margin:0 0 6px;}
+  .book-modal__row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.08);font-size:14px;}
+  .book-modal__row:last-child{border-bottom:none;}
+  .book-modal__row span:first-child{color:#8993B5;}
+  .book-modal__row span:last-child{font-weight:600;}
   .brand__mark{
     width:34px;height:34px;border-radius:9px;background:var(--amber-500);
     display:flex;align-items:center;justify-content:center;color:var(--navy-950);font-weight:700;
@@ -371,10 +392,6 @@
 
       <div class="topbar__spacer"></div>
 
-      <button class="icon-btn" aria-label="Thông báo">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="dot"></span>
-      </button>
 
       <div class="user-chip">
         <div class="user-avatar" id="userInitials">TV</div>
@@ -403,143 +420,30 @@
         <div class="filter-row">
           <div class="field grow">
             <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="text" placeholder="Tìm theo tên sách, tác giả..." />
+            <input type="text" id="searchInput" placeholder="Tìm theo tên sách, tác giả..." />
           </div>
           <div class="field field--year">
             <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
             <span>Từ năm</span>
-            <input type="number" placeholder="1990" />
+            <input type="number" id="yearFrom" placeholder="1990" />
           </div>
           <div class="field field--year">
             <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
             <span>Đến năm</span>
-            <input type="number" placeholder="2026" />
+            <input type="number" id="yearTo" placeholder="2026" />
           </div>
-          <button class="btn-primary">Tìm kiếm</button>
+          <button class="btn-primary" type="button" id="searchButton">Tìm kiếm</button>
         </div>
 
         <div class="tabs" id="tabs">
-          <div class="tab active" data-filter="all">Toàn bộ <span class="count">(6)</span></div>
-          <div class="tab" data-filter="available">Còn sẵn <span class="count">(3)</span></div>
-          <div class="tab" data-filter="borrowed">Đang mượn <span class="count">(2)</span></div>
-          <div class="tab" data-filter="returned">Đã trả <span class="count">(1)</span></div>
+          <div class="tab active" data-filter="all">Toàn bộ <span class="count" id="countAll">(0)</span></div>
+          <div class="tab" data-filter="available">Còn hàng <span class="count" id="countAvailable">(0)</span></div>
+          <div class="tab" data-filter="borrowed">Hết hàng <span class="count" id="countBorrowed">(0)</span></div>
         </div>
 
         <div class="grid" id="grid">
-
-          <article class="book-card" style="--spine:#3F7A5D" data-status="available">
-            <div class="book-card__top">
-              <div class="book-card__cover">📗</div>
-              <span class="stamp stamp--available">Còn sẵn</span>
-            </div>
-            <h3>Clean Code</h3>
-            <div class="book-card__author">
-              <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-              Robert C. Martin
-            </div>
-            <div class="book-card__meta">
-              <span>CNTT</span><span class="dot-sep"></span><span>2008</span>
-            </div>
-            <div class="book-card__foot">
-              <span class="book-card__qty">5 quyển</span>
-              <a href="#" class="book-card__link">Xem chi tiết →</a>
-            </div>
-          </article>
-
-          <article class="book-card" style="--spine:#A6432B" data-status="borrowed">
-            <div class="book-card__top">
-              <div class="book-card__cover">📕</div>
-              <span class="stamp stamp--borrowed">Đang mượn</span>
-            </div>
-            <h3>Design Patterns</h3>
-            <div class="book-card__author">
-              <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-              Gang of Four
-            </div>
-            <div class="book-card__meta">
-              <span>CNTT</span><span class="dot-sep"></span><span>1994</span>
-            </div>
-            <div class="book-card__foot">
-              <span class="book-card__qty">3 quyển</span>
-              <a href="#" class="book-card__link">Xem chi tiết →</a>
-            </div>
-          </article>
-
-          <article class="book-card" style="--spine:#5C6B8A" data-status="returned">
-            <div class="book-card__top">
-              <div class="book-card__cover">📘</div>
-              <span class="stamp stamp--returned">Đã trả</span>
-            </div>
-            <h3>Số Đỏ</h3>
-            <div class="book-card__author">
-              <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-              Vũ Trọng Phụng
-            </div>
-            <div class="book-card__meta">
-              <span>Văn học</span><span class="dot-sep"></span><span>1936</span>
-            </div>
-            <div class="book-card__foot">
-              <span class="book-card__qty">4 quyển</span>
-              <a href="#" class="book-card__link">Xem chi tiết →</a>
-            </div>
-          </article>
-
-          <article class="book-card" style="--spine:#3F7A5D" data-status="available">
-            <div class="book-card__top">
-              <div class="book-card__cover">📙</div>
-              <span class="stamp stamp--available">Còn sẵn</span>
-            </div>
-            <h3>Dế Mèn Phiêu Lưu Ký</h3>
-            <div class="book-card__author">
-              <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-              Tô Hoài
-            </div>
-            <div class="book-card__meta">
-              <span>Văn học</span><span class="dot-sep"></span><span>1941</span>
-            </div>
-            <div class="book-card__foot">
-              <span class="book-card__qty">6 quyển</span>
-              <a href="#" class="book-card__link">Xem chi tiết →</a>
-            </div>
-          </article>
-
-          <article class="book-card" style="--spine:#A6432B" data-status="borrowed">
-            <div class="book-card__top">
-              <div class="book-card__cover">📗</div>
-              <span class="stamp stamp--borrowed">Đang mượn</span>
-            </div>
-            <h3>Sapiens: Lược Sử Loài Người</h3>
-            <div class="book-card__author">
-              <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-              Yuval Noah Harari
-            </div>
-            <div class="book-card__meta">
-              <span>Khoa học</span><span class="dot-sep"></span><span>2011</span>
-            </div>
-            <div class="book-card__foot">
-              <span class="book-card__qty">2 quyển</span>
-              <a href="#" class="book-card__link">Xem chi tiết →</a>
-            </div>
-          </article>
-
-          <article class="book-card" style="--spine:#3F7A5D" data-status="available">
-            <div class="book-card__top">
-              <div class="book-card__cover">📘</div>
-              <span class="stamp stamp--available">Còn sẵn</span>
-            </div>
-            <h3>Nhà Giả Kim</h3>
-            <div class="book-card__author">
-              <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-              Paulo Coelho
-            </div>
-            <div class="book-card__meta">
-              <span>Văn học</span><span class="dot-sep"></span><span>1988</span>
-            </div>
-            <div class="book-card__foot">
-              <span class="book-card__qty">7 quyển</span>
-              <a href="#" class="book-card__link">Xem chi tiết →</a>
-            </div>
-          </article>
+          <p class="empty-state" id="gridEmpty">Đang tải danh sách sách...</p>
+        </div>
 
         </div>
       </section>
@@ -566,9 +470,18 @@
  * chưa gọi GET /sach. Muốn nối dữ liệu thật, thay phần render card bằng fetchJson('/sach').
  */
 
+function buildApiBase() {
+  const { protocol, hostname } = window.location;
+  if (hostname.endsWith(".app.github.dev")) {
+    // Codespaces: frontend va backend chay chung port 3000, cung origin
+    return `${protocol}//${hostname}`;
+  }
+  return `${protocol}//${hostname}:3000`;
+}
+
 const API_BASE =
   (typeof window !== "undefined" && window.location
-    ? `${window.location.protocol}//${window.location.hostname}:3000`
+    ? buildApiBase()
     : "http://127.0.0.1:3000");
 
 let accessToken = null;
@@ -598,6 +511,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   bindAuthEvents();
   bindDashboardEvents();
+  bindBookModalEvents();
   restoreRememberedUsername();
 });
 
@@ -674,6 +588,8 @@ function showProtectedApp(user) {
   el.loginView.classList.add("is-hidden");
   el.protectedApp.classList.remove("is-hidden");
   document.title = "Kho sách | Thư viện số";
+
+  loadSachList();
 }
 
 function showLoginScreen(message = "") {
@@ -809,30 +725,186 @@ class ApiError extends Error {
   }
 }
 
+async function loadSachList() {
+  const grid = document.getElementById("grid");
+  try {
+    const sachList = await fetchJson("/sach");
+    renderBookGrid(sachList);
+  } catch (error) {
+    console.error("Loi tai danh sach sach:", error);
+    if (grid) {
+      grid.innerHTML = `<p class="empty-state">${escapeHtml(toFriendlyMessage(error))}</p>`;
+    }
+    showToast(toFriendlyMessage(error));
+  }
+}
+
+function renderBookGrid(sachList) {
+  const grid = document.getElementById("grid");
+  if (!grid) return;
+  currentSachList = sachList;
+  grid.innerHTML = "";
+
+  let countAvailable = 0;
+  let countOut = 0;
+
+  sachList.forEach((sach) => {
+    const soLuong = Number(sach.so_luong) || 0;
+    const status = soLuong > 0 ? "available" : "borrowed";
+    if (status === "available") countAvailable += 1;
+    else countOut += 1;
+
+    const stampLabel = status === "available" ? "Con hang" : "Het hang";
+    const stampClass = status === "available" ? "stamp--available" : "stamp--borrowed";
+    const cover = status === "available" ? "\ud83d\udcd7" : "\ud83d\udcd5";
+    const spine = status === "available" ? "#3F7A5D" : "#A6432B";
+
+    const card = document.createElement("article");
+    card.className = "book-card";
+    card.style.setProperty("--spine", spine);
+    card.dataset.status = status;
+    card.dataset.sachId = sach.id;
+    card.dataset.tenSach = (sach.ten_sach || "").toLowerCase();
+    card.dataset.tacGia = (sach.tac_gia || "").toLowerCase();
+    card.dataset.namXuatBan = sach.nam_xuat_ban;
+
+    card.innerHTML = `
+      <div class="book-card__top">
+        <div class="book-card__cover">${cover}</div>
+        <span class="stamp ${stampClass}">${stampLabel}</span>
+      </div>
+      <h3>${escapeHtml(sach.ten_sach)}</h3>
+      <div class="book-card__author">
+        <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        ${escapeHtml(sach.tac_gia)}
+      </div>
+      <div class="book-card__meta">
+        <span>${escapeHtml(sach.the_loai)}</span><span class="dot-sep"></span><span>${escapeHtml(String(sach.nam_xuat_ban))}</span>
+      </div>
+      <div class="book-card__foot">
+        <span class="book-card__qty">${soLuong} quyen</span>
+        <a href="#" class="book-card__link">Xem chi tiet -&gt;</a>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  const countAllEl = document.getElementById("countAll");
+  const countAvailableEl = document.getElementById("countAvailable");
+  const countBorrowedEl = document.getElementById("countBorrowed");
+  if (countAllEl) countAllEl.textContent = `(${sachList.length})`;
+  if (countAvailableEl) countAvailableEl.textContent = `(${countAvailable})`;
+  if (countBorrowedEl) countBorrowedEl.textContent = `(${countOut})`;
+
+  applyFilters();
+}
+
+function applyFilters() {
+  const activeTab = document.querySelector(".tab.active");
+  const statusFilter = activeTab?.dataset.filter || "all";
+
+  const searchValue = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+  const yearFromRaw = document.getElementById("yearFrom")?.value;
+  const yearToRaw = document.getElementById("yearTo")?.value;
+  const yearFrom = yearFromRaw ? Number(yearFromRaw) : null;
+  const yearTo = yearToRaw ? Number(yearToRaw) : null;
+
+  document.querySelectorAll(".book-card").forEach((card) => {
+    const statusMatch = statusFilter === "all" || card.dataset.status === statusFilter;
+
+    const textMatch =
+      !searchValue ||
+      (card.dataset.tenSach || "").includes(searchValue) ||
+      (card.dataset.tacGia || "").includes(searchValue);
+
+    const year = Number(card.dataset.namXuatBan);
+    const yearMatch =
+      (yearFrom === null || year >= yearFrom) &&
+      (yearTo === null || year <= yearTo);
+
+    const match = statusMatch && textMatch && yearMatch;
+    card.style.display = match ? "" : "none";
+  });
+}
+
+function escapeHtml(value) {
+  const div = document.createElement("div");
+  div.textContent = value ?? "";
+  return div.innerHTML;
+}
+
+let currentSachList = [];
+
+function bindBookModalEvents() {
+  const backdrop = document.getElementById("bookModalBackdrop");
+  const closeBtn = document.getElementById("bookModalClose");
+  const grid = document.getElementById("grid");
+
+  closeBtn?.addEventListener("click", closeBookModal);
+  backdrop?.addEventListener("click", (event) => {
+    if (event.target === backdrop) closeBookModal();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeBookModal();
+  });
+
+  grid?.addEventListener("click", (event) => {
+    const link = event.target.closest(".book-card__link");
+    if (!link) return;
+    event.preventDefault();
+    const card = link.closest(".book-card");
+    const sachId = card?.dataset.sachId;
+    const sach = currentSachList.find((item) => String(item.id) === String(sachId));
+    if (sach) openBookModal(sach);
+  });
+}
+
+function openBookModal(sach) {
+  const soLuong = Number(sach.so_luong) || 0;
+  const status = soLuong > 0 ? "Con hang" : "Het hang";
+  const cover = soLuong > 0 ? "\ud83d\udcd7" : "\ud83d\udcd5";
+
+  document.getElementById("bookModalCover").textContent = cover;
+  document.getElementById("bookModalTitle").textContent = sach.ten_sach ?? "";
+  document.getElementById("bookModalAuthor").textContent = sach.tac_gia ?? "";
+  document.getElementById("bookModalGenre").textContent = sach.the_loai ?? "";
+  document.getElementById("bookModalYear").textContent = sach.nam_xuat_ban ?? "";
+  document.getElementById("bookModalQty").textContent = `${soLuong} quyen`;
+  document.getElementById("bookModalStatus").textContent = status;
+
+  document.getElementById("bookModalBackdrop").classList.add("show");
+}
+
+function closeBookModal() {
+  document.getElementById("bookModalBackdrop").classList.remove("show");
+}
+
 /* ========================================================================
    DASHBOARD: SIDEBAR + LỌC SÁCH THEO TRẠNG THÁI
    ======================================================================== */
 
 function bindDashboardEvents() {
   const tabs = document.querySelectorAll(".tab");
-  const cards = document.querySelectorAll(".book-card");
 
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
       tabs.forEach((t) => t.classList.remove("active"));
       tab.classList.add("active");
-      const filter = tab.dataset.filter;
-      cards.forEach((card) => {
-        const match = filter === "all" || card.dataset.status === filter;
-        card.style.display = match ? "" : "none";
-      });
+      applyFilters();
     });
   });
-
   el.menuToggle?.addEventListener("click", () => {
     el.sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
   });
   el.sidebarBackdrop?.addEventListener("click", closeSidebar);
+
+  document.getElementById("searchInput")?.addEventListener("input", applyFilters);
+  document.getElementById("yearFrom")?.addEventListener("input", applyFilters);
+  document.getElementById("yearTo")?.addEventListener("input", applyFilters);
+  document.getElementById("searchButton")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    applyFilters();
+  });
 }
 
 function openSidebar() {
@@ -849,5 +921,17 @@ function closeSidebar() {
 window.closeSidebar = closeSidebar;
 
 </script>
+<div class="book-modal-backdrop" id="bookModalBackdrop">
+  <div class="book-modal" role="dialog" aria-modal="true">
+    <button type="button" class="book-modal__close" id="bookModalClose" aria-label="Dong">&times;</button>
+    <div class="book-modal__cover" id="bookModalCover"></div>
+    <h3 id="bookModalTitle"></h3>
+    <div class="book-modal__row"><span>Tac gia</span><span id="bookModalAuthor"></span></div>
+    <div class="book-modal__row"><span>The loai</span><span id="bookModalGenre"></span></div>
+    <div class="book-modal__row"><span>Nam xuat ban</span><span id="bookModalYear"></span></div>
+    <div class="book-modal__row"><span>So luong</span><span id="bookModalQty"></span></div>
+    <div class="book-modal__row"><span>Trang thai</span><span id="bookModalStatus"></span></div>
+  </div>
+</div>
 </body>
 </html>
