@@ -1,13 +1,16 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { PhieuMuonService } from './phieu-muon.service';
-import { PhieuMuon } from './phieu-muon.entity';
+import { CreatePhieuMuonDto } from './dto/create-phieu-muon.dto';
+import { UpdatePhieuMuonDto } from './dto/update-phieu-muon.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('phieu-muon')
 export class PhieuMuonController {
   constructor(private readonly phieuMuonService: PhieuMuonService) {}
 
   @Post()
-  create(@Body() data: Partial<PhieuMuon>) {
+  create(@Body() data: CreatePhieuMuonDto) {
     return this.phieuMuonService.create(data);
   }
 
@@ -17,7 +20,7 @@ export class PhieuMuonController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() data: Partial<PhieuMuon>) {
+  update(@Param('id') id: string, @Body() data: UpdatePhieuMuonDto) {
     return this.phieuMuonService.update(+id, data);
   }
 

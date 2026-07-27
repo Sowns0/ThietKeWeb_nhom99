@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { Sach } from './sach.entity';
 
 @Injectable()
@@ -16,9 +15,7 @@ export class SachService {
   }
 
   findOne(id: number) {
-    return this.sachRepository.findOne({
-      where: { id },
-    });
+    return this.sachRepository.findOne({ where: { id } });
   }
 
   create(data: Partial<Sach>) {
