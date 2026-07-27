@@ -282,6 +282,76 @@
   }
 
   :focus-visible{outline:2.5px solid var(--amber-500);outline-offset:2px;}
+  /* ---------- Phiếu mượn ---------- */
+  .loan-layout{display:flex;align-items:flex-start;gap:24px;padding:18px 24px 28px;}
+
+  .loan-main{flex:1 1 60%;min-width:0;}
+
+  .loan-reader-select{margin-bottom:16px;}
+  .loan-reader-select label{display:block;font-size:12.5px;font-weight:600;color:var(--muted-700);margin-bottom:6px;}
+  .loan-reader-select select{
+    width:100%;max-width:360px;padding:10px 12px;border:1px solid var(--line-200);border-radius:10px;
+    font:inherit;font-size:13.5px;background:#fff;color:var(--ink-900);
+  }
+  .loan-reader-select select:focus{outline:none;border-color:var(--amber-500);}
+  .loan-reader-hint{margin:8px 0 0;font-size:12px;color:var(--muted-500);}
+
+  .loan-table-wrap{overflow-x:auto;border:1px solid var(--line-200);border-radius:12px;}
+  .loan-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .loan-table thead th{
+    text-align:left;color:var(--muted-500);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;
+    padding:10px 12px;border-bottom:1px solid var(--line-200);background:var(--paper-50);
+  }
+  .loan-table tbody td{padding:10px 12px;border-bottom:1px solid var(--line-200);vertical-align:middle;color:var(--ink-900);}
+  .loan-table tbody tr:last-child td{border-bottom:none;}
+  .loan-table__author{color:var(--muted-700);}
+  .loan-table__qty{font-family:'IBM Plex Mono',monospace;}
+  .loan-table__qty--out{color:var(--stamp-borrowed);font-weight:600;}
+
+  .btn-borrow{
+    background:var(--navy-950);color:#fff;border:none;border-radius:8px;padding:7px 14px;
+    font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;
+  }
+  .btn-borrow:hover:not(:disabled){background:var(--navy-800);}
+  .btn-borrow:disabled{background:var(--line-200);color:var(--muted-500);cursor:not-allowed;}
+
+  .btn-ghost{
+    background:none;border:1px solid var(--line-200);border-radius:10px;padding:9px 16px;
+    font-size:13px;font-weight:600;color:var(--muted-700);cursor:pointer;
+  }
+  .btn-ghost:hover{background:var(--paper-50);}
+
+  .loan-history{
+    flex:0 0 340px;background:var(--paper-50);border:1px solid var(--line-200);border-radius:12px;
+    padding:16px;max-height:620px;display:flex;flex-direction:column;
+  }
+  .loan-history__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .loan-history__head h2{font-size:15.5px;}
+  .loan-history__list{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px;padding-right:2px;}
+  .loan-history__item{background:#fff;border:1px solid var(--line-200);border-radius:10px;padding:10px 12px;}
+  .loan-history__item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .loan-history__title{font-weight:600;font-size:13.5px;color:var(--ink-900);line-height:1.3;}
+  .loan-history__meta{color:var(--muted-500);font-size:11.5px;margin-top:6px;line-height:1.5;}
+
+  .loan-status{
+    font-size:10.5px;padding:3px 9px;border-radius:999px;font-weight:600;white-space:nowrap;flex-shrink:0;
+  }
+  .loan-status--dang{background:rgba(217,164,65,.18);color:var(--amber-600);}
+  .loan-status--tra{background:rgba(63,122,93,.18);color:var(--stamp-available);}
+
+  .loan-confirm__error{color:var(--stamp-borrowed);font-size:12.5px;margin:10px 0 0;}
+  .loan-confirm__actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+  .loan-success-modal{text-align:center;}
+  .loan-success__icon{font-size:38px;margin-bottom:8px;}
+  .loan-success__desc{color:var(--muted-700);font-size:13.5px;margin:4px 0 18px;}
+  .loan-success__ok{width:100%;}
+
+  @media (max-width: 900px){
+    .loan-layout{flex-direction:column;}
+    .loan-history{flex:1 1 auto;width:100%;max-height:360px;}
+  }
+
   @media (prefers-reduced-motion: reduce){*{transition:none !important;}}
 
 </style>
@@ -360,15 +430,15 @@
 
     <p class="nav-label">Chức năng</p>
 
-    <a href="#" class="nav-item active">
+    <a href="#" class="nav-item active" data-view="kho-sach">
       <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       Kho sách
     </a>
-    <a href="#" class="nav-item">
+    <a href="#" class="nav-item" data-view="phieu-muon">
       <svg class="icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/><path d="M9 12h6M9 16h6"/></svg>
       Phiếu mượn
     </a>
-    <a href="#" class="nav-item">
+    <a href="#" class="nav-item" data-view="doc-gia">
       <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Độc giả
     </a>
@@ -408,7 +478,7 @@
     </header>
 
     <div class="content">
-      <section class="panel">
+      <section class="panel" id="panelKhoSach">
 
         <div class="panel__head">
           <h1>Kho sách</h1>
@@ -447,6 +517,72 @@
 
         </div>
       </section>
+
+      <!-- ================= PHIẾU MƯỢN ================= -->
+      <section class="panel is-hidden" id="panelPhieuMuon">
+
+        <div class="panel__head">
+          <h1>Phiếu mượn</h1>
+        </div>
+
+        <div class="loan-layout">
+
+          <!-- CỘT TRÁI: Bước 1 - chọn độc giả + chọn sách để mượn -->
+          <div class="loan-main">
+
+            <div class="loan-reader-select">
+              <label for="loanDocGiaSelect">Độc giả mượn sách</label>
+              <select id="loanDocGiaSelect">
+                <option value="">-- Chọn độc giả --</option>
+              </select>
+              <p class="loan-reader-hint" id="loanReaderHint">Chọn độc giả trước, sau đó bấm "Mượn" ở sách muốn cho mượn.</p>
+            </div>
+
+            <div class="filter-row" style="padding:0 0 14px;">
+              <div class="field grow">
+                <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="loanSearchInput" placeholder="Tìm sách theo tên, tác giả..." />
+              </div>
+            </div>
+
+            <div class="loan-table-wrap">
+              <table class="loan-table" id="loanBookTable">
+                <thead>
+                  <tr>
+                    <th>Sách</th>
+                    <th>Tác giả</th>
+                    <th>Còn lại</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="loanBookTableBody">
+                  <tr><td colspan="4" class="empty-state">Đang tải danh sách sách...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- CỘT PHẢI: Lịch sử mượn / sách đã mượn -->
+          <aside class="loan-history">
+            <div class="loan-history__head">
+              <h2>Lịch sử mượn</h2>
+            </div>
+            <div class="loan-history__list" id="loanHistoryList">
+              <p class="empty-state">Đang tải lịch sử...</p>
+            </div>
+          </aside>
+
+        </div>
+      </section>
+
+      <!-- ================= ĐỘC GIẢ (placeholder) ================= -->
+      <section class="panel is-hidden" id="panelDocGia">
+        <div class="panel__head">
+          <h1>Độc giả</h1>
+        </div>
+        <p class="empty-state" style="padding:24px;">Chức năng quản lý độc giả đang được phát triển.</p>
+      </section>
+
     </div>
   </div>
 </div>
@@ -512,6 +648,8 @@ document.addEventListener("DOMContentLoaded", () => {
   bindAuthEvents();
   bindDashboardEvents();
   bindBookModalEvents();
+  bindNavEvents();
+  bindLoanEvents();
   restoreRememberedUsername();
 });
 
@@ -920,6 +1058,299 @@ function closeSidebar() {
 // Được gọi trực tiếp từ nút X trong sidebar (onclick="closeSidebar()")
 window.closeSidebar = closeSidebar;
 
+/* ========================================================================
+   CHUYỂN TAB (Kho sách / Phiếu mượn / Độc giả)
+   ======================================================================== */
+
+const PANEL_BY_VIEW = {
+  "kho-sach": "panelKhoSach",
+  "phieu-muon": "panelPhieuMuon",
+  "doc-gia": "panelDocGia",
+};
+
+function bindNavEvents() {
+  const navItems = document.querySelectorAll(".nav-item[data-view]");
+  navItems.forEach((item) => {
+    item.addEventListener("click", (event) => {
+      event.preventDefault();
+      const view = item.dataset.view;
+      switchView(view);
+      navItems.forEach((i) => i.classList.remove("active"));
+      item.classList.add("active");
+      closeSidebar();
+    });
+  });
+}
+
+function switchView(view) {
+  Object.values(PANEL_BY_VIEW).forEach((panelId) => {
+    document.getElementById(panelId)?.classList.add("is-hidden");
+  });
+  const targetId = PANEL_BY_VIEW[view];
+  document.getElementById(targetId)?.classList.remove("is-hidden");
+
+  if (view === "phieu-muon") {
+    loadPhieuMuonView();
+  }
+}
+
+/* ========================================================================
+   PHIẾU MƯỢN: Bước 1 (chọn độc giả + sách) -> Bước 2 (xác nhận) -> Bước 3 (thông báo)
+   ======================================================================== */
+
+let currentDocGiaList = [];
+let currentPhieuMuonList = [];
+let pendingLoan = null; // { sachId, tenSach, docGiaId, docGiaTen }
+let loanViewLoaded = false;
+
+async function loadPhieuMuonView() {
+  const tableBody = document.getElementById("loanBookTableBody");
+  const historyList = document.getElementById("loanHistoryList");
+
+  try {
+    const tasks = [loadDocGiaList(), loadPhieuMuonList()];
+    // Danh sách sách: dùng lại currentSachList nếu Kho sách đã tải xong, không thì tải mới.
+    if (!currentSachList.length) tasks.push(loadSachList());
+    await Promise.all(tasks);
+
+    renderLoanBookTable();
+    renderLoanHistory();
+    loanViewLoaded = true;
+  } catch (error) {
+    console.error("Loi tai du lieu phieu muon:", error);
+    if (tableBody) tableBody.innerHTML = `<tr><td colspan="4" class="empty-state">${escapeHtml(toFriendlyMessage(error))}</td></tr>`;
+    if (historyList) historyList.innerHTML = `<p class="empty-state">${escapeHtml(toFriendlyMessage(error))}</p>`;
+    showToast(toFriendlyMessage(error));
+  }
+}
+
+async function loadDocGiaList() {
+  currentDocGiaList = await fetchJson("/doc-gia");
+  renderDocGiaOptions();
+}
+
+async function loadPhieuMuonList() {
+  currentPhieuMuonList = await fetchJson("/phieu-muon");
+}
+
+function renderDocGiaOptions() {
+  const select = document.getElementById("loanDocGiaSelect");
+  if (!select) return;
+  const previousValue = select.value;
+
+  select.innerHTML = `<option value="">-- Chọn độc giả --</option>`;
+  currentDocGiaList.forEach((docGia) => {
+    const option = document.createElement("option");
+    option.value = docGia.id;
+    option.textContent = docGia.ho_ten;
+    select.appendChild(option);
+  });
+
+  if (previousValue && currentDocGiaList.some((d) => String(d.id) === previousValue)) {
+    select.value = previousValue;
+  }
+}
+
+function renderLoanBookTable() {
+  const tableBody = document.getElementById("loanBookTableBody");
+  if (!tableBody) return;
+
+  const searchValue = (document.getElementById("loanSearchInput")?.value || "").trim().toLowerCase();
+
+  const rows = currentSachList
+    .filter((sach) => {
+      if (!searchValue) return true;
+      return (
+        (sach.ten_sach || "").toLowerCase().includes(searchValue) ||
+        (sach.tac_gia || "").toLowerCase().includes(searchValue)
+      );
+    })
+    .map((sach) => {
+      const soLuong = Number(sach.so_luong) || 0;
+      const outOfStock = soLuong <= 0;
+      const qtyClass = outOfStock ? "loan-table__qty loan-table__qty--out" : "loan-table__qty";
+      return `
+        <tr data-sach-id="${sach.id}">
+          <td>${escapeHtml(sach.ten_sach)}</td>
+          <td class="loan-table__author">${escapeHtml(sach.tac_gia)}</td>
+          <td class="${qtyClass}">${soLuong}</td>
+          <td>
+            <button type="button" class="btn-borrow" data-sach-id="${sach.id}" ${outOfStock ? "disabled" : ""}>
+              ${outOfStock ? "Hết sách" : "Mượn"}
+            </button>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  tableBody.innerHTML = rows || `<tr><td colspan="4" class="empty-state">Không tìm thấy sách phù hợp.</td></tr>`;
+}
+
+function renderLoanHistory() {
+  const historyList = document.getElementById("loanHistoryList");
+  if (!historyList) return;
+
+  if (!currentPhieuMuonList.length) {
+    historyList.innerHTML = `<p class="empty-state">Chưa có phiếu mượn nào.</p>`;
+    return;
+  }
+
+  const sorted = [...currentPhieuMuonList].sort((a, b) => (b.id || 0) - (a.id || 0));
+
+  historyList.innerHTML = sorted
+    .map((phieu) => {
+      const sach = currentSachList.find((s) => String(s.id) === String(phieu.sach_id));
+      const docGia = currentDocGiaList.find((d) => String(d.id) === String(phieu.doc_gia_id));
+      const daTra = Boolean(phieu.ngay_tra) || phieu.trang_thai === "Đã trả";
+      const statusClass = daTra ? "loan-status loan-status--tra" : "loan-status loan-status--dang";
+      const statusLabel = daTra ? "Đã trả" : "Đang mượn";
+
+      return `
+        <div class="loan-history__item">
+          <div class="loan-history__item-top">
+            <span class="loan-history__title">${escapeHtml(sach?.ten_sach || `Sách #${phieu.sach_id}`)}</span>
+            <span class="${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="loan-history__meta">
+            Độc giả: ${escapeHtml(docGia?.ho_ten || `#${phieu.doc_gia_id}`)}<br/>
+            Ngày mượn: ${escapeHtml(formatDateVn(phieu.ngay_muon))}${daTra ? `<br/>Ngày trả: ${escapeHtml(formatDateVn(phieu.ngay_tra))}` : ""}
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function formatDateVn(isoDate) {
+  if (!isoDate) return "—";
+  const parts = String(isoDate).slice(0, 10).split("-");
+  if (parts.length !== 3) return isoDate;
+  const [y, m, d] = parts;
+  return `${d}/${m}/${y}`;
+}
+
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function bindLoanEvents() {
+  document.getElementById("loanSearchInput")?.addEventListener("input", renderLoanBookTable);
+
+  document.getElementById("loanBookTableBody")?.addEventListener("click", (event) => {
+    const button = event.target.closest(".btn-borrow");
+    if (!button || button.disabled) return;
+    handleBorrowClick(button.dataset.sachId);
+  });
+
+  // Bước 2: popup xác nhận
+  document.getElementById("loanConfirmClose")?.addEventListener("click", closeLoanConfirm);
+  document.getElementById("loanConfirmCancel")?.addEventListener("click", closeLoanConfirm);
+  document.getElementById("loanConfirmBackdrop")?.addEventListener("click", (event) => {
+    if (event.target.id === "loanConfirmBackdrop") closeLoanConfirm();
+  });
+  document.getElementById("loanConfirmSubmit")?.addEventListener("click", submitLoanConfirm);
+
+  // Bước 3: thông báo thành công
+  document.getElementById("loanSuccessClose")?.addEventListener("click", closeLoanSuccess);
+  document.getElementById("loanSuccessOk")?.addEventListener("click", closeLoanSuccess);
+  document.getElementById("loanSuccessBackdrop")?.addEventListener("click", (event) => {
+    if (event.target.id === "loanSuccessBackdrop") closeLoanSuccess();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    closeLoanConfirm();
+    closeLoanSuccess();
+  });
+}
+
+function handleBorrowClick(sachId) {
+  const select = document.getElementById("loanDocGiaSelect");
+  const docGiaId = select?.value;
+
+  if (!docGiaId) {
+    showToast("Vui lòng chọn độc giả trước khi mượn sách.");
+    select?.focus();
+    return;
+  }
+
+  const sach = currentSachList.find((item) => String(item.id) === String(sachId));
+  const docGia = currentDocGiaList.find((item) => String(item.id) === String(docGiaId));
+  if (!sach || !docGia) return;
+
+  pendingLoan = {
+    sachId: sach.id,
+    tenSach: sach.ten_sach,
+    docGiaId: docGia.id,
+    docGiaTen: docGia.ho_ten,
+  };
+
+  openLoanConfirm();
+}
+
+function openLoanConfirm() {
+  if (!pendingLoan) return;
+  document.getElementById("loanConfirmDocGia").textContent = pendingLoan.docGiaTen;
+  document.getElementById("loanConfirmSach").textContent = pendingLoan.tenSach;
+  document.getElementById("loanConfirmDate").textContent = formatDateVn(todayIso());
+  setLoanConfirmError("");
+  document.getElementById("loanConfirmBackdrop")?.classList.add("show");
+}
+
+function closeLoanConfirm() {
+  document.getElementById("loanConfirmBackdrop")?.classList.remove("show");
+  pendingLoan = null;
+}
+
+function setLoanConfirmError(message) {
+  const el = document.getElementById("loanConfirmError");
+  if (!el) return;
+  el.textContent = message;
+  el.classList.toggle("is-hidden", !message);
+}
+
+async function submitLoanConfirm() {
+  if (!pendingLoan) return;
+  const submitButton = document.getElementById("loanConfirmSubmit");
+  submitButton.disabled = true;
+  submitButton.textContent = "Đang xử lý...";
+  setLoanConfirmError("");
+
+  try {
+    await fetchJson("/phieu-muon", {
+      method: "POST",
+      body: {
+        doc_gia_id: Number(pendingLoan.docGiaId),
+        sach_id: Number(pendingLoan.sachId),
+        ngay_muon: todayIso(),
+      },
+    });
+
+    const successDesc = `Độc giả "${pendingLoan.docGiaTen}" đã mượn sách "${pendingLoan.tenSach}".`;
+    closeLoanConfirm();
+    await Promise.all([loadPhieuMuonList(), loadSachList()]);
+    renderLoanBookTable();
+    renderLoanHistory();
+    openLoanSuccess(successDesc);
+  } catch (error) {
+    console.error("Loi tao phieu muon:", error);
+    setLoanConfirmError(toFriendlyMessage(error));
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Xác nhận mượn";
+  }
+}
+
+function openLoanSuccess(description) {
+  document.getElementById("loanSuccessDesc").textContent = description;
+  document.getElementById("loanSuccessBackdrop")?.classList.add("show");
+}
+
+function closeLoanSuccess() {
+  document.getElementById("loanSuccessBackdrop")?.classList.remove("show");
+}
+
 </script>
 <div class="book-modal-backdrop" id="bookModalBackdrop">
   <div class="book-modal" role="dialog" aria-modal="true">
@@ -931,6 +1362,33 @@ window.closeSidebar = closeSidebar;
     <div class="book-modal__row"><span>Nam xuat ban</span><span id="bookModalYear"></span></div>
     <div class="book-modal__row"><span>So luong</span><span id="bookModalQty"></span></div>
     <div class="book-modal__row"><span>Trang thai</span><span id="bookModalStatus"></span></div>
+  </div>
+</div>
+
+<!-- Bước 2: popup xác nhận mượn sách -->
+<div class="book-modal-backdrop" id="loanConfirmBackdrop">
+  <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true">
+    <button type="button" class="book-modal__close" id="loanConfirmClose" aria-label="Đóng">&times;</button>
+    <h3>Xác nhận mượn sách</h3>
+    <div class="book-modal__row"><span>Độc giả</span><span id="loanConfirmDocGia"></span></div>
+    <div class="book-modal__row"><span>Sách</span><span id="loanConfirmSach"></span></div>
+    <div class="book-modal__row"><span>Ngày mượn</span><span id="loanConfirmDate"></span></div>
+    <p class="loan-confirm__error is-hidden" id="loanConfirmError"></p>
+    <div class="loan-confirm__actions">
+      <button type="button" class="btn-ghost" id="loanConfirmCancel">Không mượn</button>
+      <button type="button" class="btn-primary" id="loanConfirmSubmit">Xác nhận mượn</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bước 3: modal thông báo đã mượn thành công -->
+<div class="book-modal-backdrop" id="loanSuccessBackdrop">
+  <div class="book-modal loan-success-modal" role="dialog" aria-modal="true">
+    <button type="button" class="book-modal__close" id="loanSuccessClose" aria-label="Đóng">&times;</button>
+    <div class="loan-success__icon">✅</div>
+    <h3>Đã mượn thành công</h3>
+    <p class="loan-success__desc" id="loanSuccessDesc"></p>
+    <button type="button" class="btn-primary loan-success__ok" id="loanSuccessOk">Đóng</button>
   </div>
 </div>
 </body>
