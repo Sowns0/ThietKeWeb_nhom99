@@ -338,6 +338,21 @@
   }
   .loan-status--dang{background:rgba(217,164,65,.18);color:var(--amber-600);}
   .loan-status--tra{background:rgba(63,122,93,.18);color:var(--stamp-available);}
+  .loan-status--huy{background:rgba(196,72,72,.16);color:var(--stamp-borrowed);}
+
+  .loan-history__cancel-wrap{margin-top:10px;text-align:right;}
+  .btn-cancel-loan{
+    background:none;border:1px solid var(--stamp-borrowed);color:var(--stamp-borrowed);border-radius:8px;
+    padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;
+  }
+  .btn-cancel-loan:hover{background:rgba(196,72,72,.08);}
+
+  .btn-danger{
+    background:var(--stamp-borrowed);color:#fff;border:none;border-radius:10px;padding:9px 16px;
+    font-size:13px;font-weight:600;cursor:pointer;
+  }
+  .btn-danger:hover:not(:disabled){filter:brightness(.92);}
+  .btn-danger:disabled{opacity:.65;cursor:not-allowed;}
 
   .loan-confirm__error{color:var(--stamp-borrowed);font-size:12.5px;margin:10px 0 0;}
   .loan-confirm__actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
@@ -444,7 +459,7 @@
     </a>
 
     <div class="sidebar__footer">
-      <p>Thư viện số &middot; Phenikaa<br/>Phiên bản mockup UI</p>
+      <p>Thư viện số &middot; Phenikaa<br/></p>
     </div>
   </aside>
 
@@ -1156,8 +1171,10 @@ function renderLoanBookTable() {
   if (!tableBody) return;
 
   const searchValue = (document.getElementById("loanSearchInput")?.value || "").trim().toLowerCase();
+  const borrowedSachIds = getBorrowedSachIds();
 
   const rows = currentSachList
+    .filter((sach) => !borrowedSachIds.has(String(sach.id)))
     .filter((sach) => {
       if (!searchValue) return true;
       return (
@@ -1187,6 +1204,22 @@ function renderLoanBookTable() {
   tableBody.innerHTML = rows || `<tr><td colspan="4" class="empty-state">Không tìm thấy sách phù hợp.</td></tr>`;
 }
 
+// Trạng thái phiếu mượn: "dang" (đang mượn), "tra" (đã trả), "huy" (đã hủy)
+function getLoanStatus(phieu) {
+  if (phieu.trang_thai === "Đã hủy") return "huy";
+  if (phieu.ngay_tra || phieu.trang_thai === "Đã trả") return "tra";
+  return "dang";
+}
+
+// Danh sách sach_id đang được mượn (chưa trả, chưa hủy) — dùng để ẩn khỏi danh sách cho mượn
+function getBorrowedSachIds() {
+  return new Set(
+    currentPhieuMuonList
+      .filter((phieu) => getLoanStatus(phieu) === "dang")
+      .map((phieu) => String(phieu.sach_id))
+  );
+}
+
 function renderLoanHistory() {
   const historyList = document.getElementById("loanHistoryList");
   if (!historyList) return;
@@ -1198,13 +1231,20 @@ function renderLoanHistory() {
 
   const sorted = [...currentPhieuMuonList].sort((a, b) => (b.id || 0) - (a.id || 0));
 
+  const statusMeta = {
+    dang: { className: "loan-status loan-status--dang", label: "Đang mượn" },
+    tra: { className: "loan-status loan-status--tra", label: "Đã trả" },
+    huy: { className: "loan-status loan-status--huy", label: "Đã hủy" },
+  };
+
   historyList.innerHTML = sorted
     .map((phieu) => {
       const sach = currentSachList.find((s) => String(s.id) === String(phieu.sach_id));
       const docGia = currentDocGiaList.find((d) => String(d.id) === String(phieu.doc_gia_id));
-      const daTra = Boolean(phieu.ngay_tra) || phieu.trang_thai === "Đã trả";
-      const statusClass = daTra ? "loan-status loan-status--tra" : "loan-status loan-status--dang";
-      const statusLabel = daTra ? "Đã trả" : "Đang mượn";
+      const status = getLoanStatus(phieu);
+      const { className: statusClass, label: statusLabel } = statusMeta[status];
+      // Chỉ cho phép hủy mượn khi sách đang ở trạng thái "Đang mượn"
+      const canCancel = status === "dang";
 
       return `
         <div class="loan-history__item">
@@ -1214,8 +1254,12 @@ function renderLoanHistory() {
           </div>
           <div class="loan-history__meta">
             Độc giả: ${escapeHtml(docGia?.ho_ten || `#${phieu.doc_gia_id}`)}<br/>
-            Ngày mượn: ${escapeHtml(formatDateVn(phieu.ngay_muon))}${daTra ? `<br/>Ngày trả: ${escapeHtml(formatDateVn(phieu.ngay_tra))}` : ""}
+            Ngày mượn: ${escapeHtml(formatDateVn(phieu.ngay_muon))}${status === "tra" ? `<br/>Ngày trả: ${escapeHtml(formatDateVn(phieu.ngay_tra))}` : ""}
           </div>
+          ${canCancel ? `
+          <div class="loan-history__cancel-wrap">
+            <button type="button" class="btn-cancel-loan" data-phieu-id="${phieu.id}">Hủy mượn</button>
+          </div>` : ""}
         </div>
       `;
     })
@@ -1258,10 +1302,24 @@ function bindLoanEvents() {
     if (event.target.id === "loanSuccessBackdrop") closeLoanSuccess();
   });
 
+  // Hủy mượn: nút trong lịch sử mượn + popup xác nhận hủy
+  document.getElementById("loanHistoryList")?.addEventListener("click", (event) => {
+    const button = event.target.closest(".btn-cancel-loan");
+    if (!button) return;
+    openCancelConfirm(button.dataset.phieuId);
+  });
+  document.getElementById("cancelConfirmClose")?.addEventListener("click", closeCancelConfirm);
+  document.getElementById("cancelConfirmCancel")?.addEventListener("click", closeCancelConfirm);
+  document.getElementById("cancelConfirmBackdrop")?.addEventListener("click", (event) => {
+    if (event.target.id === "cancelConfirmBackdrop") closeCancelConfirm();
+  });
+  document.getElementById("cancelConfirmSubmit")?.addEventListener("click", submitCancelConfirm);
+
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     closeLoanConfirm();
     closeLoanSuccess();
+    closeCancelConfirm();
   });
 }
 
@@ -1351,6 +1409,64 @@ function closeLoanSuccess() {
   document.getElementById("loanSuccessBackdrop")?.classList.remove("show");
 }
 
+/* ---------- Hủy mượn ---------- */
+let pendingCancel = null; // { id }
+
+function openCancelConfirm(phieuId) {
+  const phieu = currentPhieuMuonList.find((p) => String(p.id) === String(phieuId));
+  if (!phieu || getLoanStatus(phieu) !== "dang") return; // chỉ hủy được khi đang mượn
+
+  const sach = currentSachList.find((s) => String(s.id) === String(phieu.sach_id));
+  const docGia = currentDocGiaList.find((d) => String(d.id) === String(phieu.doc_gia_id));
+
+  pendingCancel = { id: phieu.id };
+
+  document.getElementById("cancelConfirmDocGia").textContent = docGia?.ho_ten || `#${phieu.doc_gia_id}`;
+  document.getElementById("cancelConfirmSach").textContent = sach?.ten_sach || `Sách #${phieu.sach_id}`;
+  document.getElementById("cancelConfirmDate").textContent = formatDateVn(phieu.ngay_muon);
+  setCancelConfirmError("");
+  document.getElementById("cancelConfirmBackdrop")?.classList.add("show");
+}
+
+function closeCancelConfirm() {
+  document.getElementById("cancelConfirmBackdrop")?.classList.remove("show");
+  pendingCancel = null;
+}
+
+function setCancelConfirmError(message) {
+  const el = document.getElementById("cancelConfirmError");
+  if (!el) return;
+  el.textContent = message;
+  el.classList.toggle("is-hidden", !message);
+}
+
+async function submitCancelConfirm() {
+  if (!pendingCancel) return;
+  const submitButton = document.getElementById("cancelConfirmSubmit");
+  submitButton.disabled = true;
+  submitButton.textContent = "Đang xử lý...";
+  setCancelConfirmError("");
+
+  try {
+    await fetchJson(`/phieu-muon/${pendingCancel.id}`, {
+      method: "PUT",
+      body: { trang_thai: "Đã hủy" },
+    });
+
+    closeCancelConfirm();
+    await Promise.all([loadPhieuMuonList(), loadSachList()]);
+    renderLoanBookTable();
+    renderLoanHistory();
+    showToast("Đã hủy phiếu mượn. Sách đã trở lại danh sách cho mượn.");
+  } catch (error) {
+    console.error("Loi huy phieu muon:", error);
+    setCancelConfirmError(toFriendlyMessage(error));
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Xác nhận hủy";
+  }
+}
+
 </script>
 <div class="book-modal-backdrop" id="bookModalBackdrop">
   <div class="book-modal" role="dialog" aria-modal="true">
@@ -1389,6 +1505,22 @@ function closeLoanSuccess() {
     <h3>Đã mượn thành công</h3>
     <p class="loan-success__desc" id="loanSuccessDesc"></p>
     <button type="button" class="btn-primary loan-success__ok" id="loanSuccessOk">Đóng</button>
+  </div>
+</div>
+
+<!-- Popup xác nhận hủy mượn -->
+<div class="book-modal-backdrop" id="cancelConfirmBackdrop">
+  <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true">
+    <button type="button" class="book-modal__close" id="cancelConfirmClose" aria-label="Đóng">&times;</button>
+    <h3>Xác nhận hủy mượn</h3>
+    <div class="book-modal__row"><span>Độc giả</span><span id="cancelConfirmDocGia"></span></div>
+    <div class="book-modal__row"><span>Sách</span><span id="cancelConfirmSach"></span></div>
+    <div class="book-modal__row"><span>Ngày mượn</span><span id="cancelConfirmDate"></span></div>
+    <p class="loan-confirm__error is-hidden" id="cancelConfirmError"></p>
+    <div class="loan-confirm__actions">
+      <button type="button" class="btn-ghost" id="cancelConfirmCancel">Không hủy</button>
+      <button type="button" class="btn-danger" id="cancelConfirmSubmit">Xác nhận hủy</button>
+    </div>
   </div>
 </div>
 </body>
