@@ -27,6 +27,19 @@
       --stamp-returned: #5C6B8A;
       --stamp-available: #3F7A5D;
       --radius-card: 14px;
+
+      /* Added for Quick Analytics */
+      --surface-100: #ffffff;
+      --surface-200: #f6f3ea;
+      --surface-300: #e7e1d3;
+      --line-100: #e7e1d3;
+      --blue-100: #e7f5ff;
+      --blue-200: #d0ebff;
+      --blue-300: #a5d8ff;
+      --blue-700: #1864ab;
+      --red-600: #fa5252;
+      --red-700: #e03131;
+      --orange-600: #fd7e14;
     }
 
     .is-hidden {
@@ -340,6 +353,112 @@
 
     .search-global .icon {
       color: var(--muted-500);
+    }
+
+    .global-search-container {
+      position: relative;
+      flex: 1;
+      max-width: 380px;
+    }
+    
+    .global-search-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--surface-100);
+      border: 1px solid var(--line-200);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-top: 8px;
+      z-index: 1000;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .global-search-dropdown.is-hidden {
+      display: none;
+    }
+    
+    .gs-section {
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted-500);
+      text-transform: uppercase;
+      background: var(--surface-200);
+    }
+    
+    .gs-item {
+      padding: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--line-100);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .gs-item:hover {
+      background: var(--surface-200);
+    }
+    
+    .gs-item-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-900);
+    }
+    
+    .gs-item-desc {
+      font-size: 12px;
+      color: var(--muted-500);
+    }
+    .gs-btn-action {
+      margin-top: 6px;
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 4px;
+      background: var(--blue-100);
+      color: var(--blue-700);
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      text-align: center;
+      width: fit-content;
+    }
+    .gs-btn-action:hover {
+      background: var(--blue-200);
+    }
+    .gs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 8px 12px;
+    }
+    .gs-grid-item {
+      background: var(--surface-100);
+      border: 1px solid var(--line-200);
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .gs-grid-item:hover {
+      background: var(--surface-200);
+      border-color: var(--blue-300);
+    }
+    .gs-grid-title {
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--muted-500);
+      text-transform: uppercase;
+    }
+    .gs-grid-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ink-900);
+      margin-top: 6px;
     }
 
     .topbar__spacer {
@@ -1387,12 +1506,15 @@
           </svg>
         </button>
 
-        <div class="search-global">
-          <svg class="icon" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <input type="text" placeholder="Tìm kiếm chức năng..." />
+        <div class="global-search-container" id="globalSearchContainer">
+          <div class="search-global">
+            <svg class="icon" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input type="text" id="globalSearchInput" placeholder="Tra cứu thống kê (quá hạn, sách...)" autocomplete="off" />
+          </div>
+          <div class="global-search-dropdown is-hidden" id="globalSearchDropdown"></div>
         </div>
 
         <div class="topbar__spacer"></div>
@@ -2331,6 +2453,205 @@
           closeSidebar();
         });
       });
+
+      function removeVietnameseTones(str) {
+        if(!str) return "";
+        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+        str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        str = str.replace(/đ/g, "d");
+        str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+        str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+        str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+        str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+        str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+        str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+        str = str.replace(/Đ/g, "D");
+        str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); 
+        str = str.replace(/\u02C6|\u0306|\u031B/g, ""); 
+        return str.toLowerCase();
+      }
+
+      // Global Search Logic
+      const gsInput = document.getElementById('globalSearchInput');
+      const gsDropdown = document.getElementById('globalSearchDropdown');
+      const gsContainer = document.getElementById('globalSearchContainer');
+      let gsTimeout = null;
+
+      if (gsInput && gsDropdown) {
+        // Hỗ trợ phím tắt Ctrl + K
+        document.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            gsInput.focus();
+          }
+        });
+
+        const showEmptyState = () => {
+          const activeLoans = (currentPhieuMuonList || []).filter(p => getLoanStatus(p) === 'dang').length;
+          const totalBooks = (currentSachList || []).reduce((sum, s) => sum + s.so_luong, 0);
+          gsDropdown.innerHTML = `
+            <div class="gs-section">📊 Thống kê nhanh hôm nay</div>
+            <div class="gs-grid">
+              <div class="gs-grid-item" onclick="document.querySelector('.nav-item[data-view=\\'phieu-muon\\']').click(); document.getElementById('globalSearchDropdown').classList.add('is-hidden');">
+                <div class="gs-grid-title">Đang mượn</div>
+                <div class="gs-grid-value">${activeLoans}</div>
+              </div>
+              <div class="gs-grid-item" onclick="document.querySelector('.nav-item[data-view=\\'kho-sach\\']').click(); document.getElementById('globalSearchDropdown').classList.add('is-hidden');">
+                <div class="gs-grid-title">Tổng sách</div>
+                <div class="gs-grid-value">${totalBooks}</div>
+              </div>
+              <div class="gs-grid-item" onclick="document.querySelector('.nav-item[data-view=\\'doc-gia\\']').click(); document.getElementById('globalSearchDropdown').classList.add('is-hidden');">
+                <div class="gs-grid-title">Độc giả</div>
+                <div class="gs-grid-value">${(currentDocGiaList || []).length}</div>
+              </div>
+              <div class="gs-grid-item" onclick="document.querySelector('.nav-item[data-view=\\'phieu-muon\\']').click(); document.getElementById('globalSearchDropdown').classList.add('is-hidden');">
+                <div class="gs-grid-title" style="color:var(--red-600)">Quá hạn</div>
+                <div class="gs-grid-value" style="color:var(--red-600)">${(currentPhieuMuonList || []).filter(p => getLoanStatus(p) === 'dang' && new Date(p.ngay_han) < new Date()).length}</div>
+              </div>
+            </div>
+            <div class="gs-section" style="margin-top:4px;">💡 Gợi ý lệnh (Ctrl+K)</div>
+            <div class="gs-item" style="padding-top:8px; padding-bottom:8px; cursor:default;">
+              <div class="gs-item-desc">"qua han", "tien phat", "hot", "het sach", hoặc nhập Mã SV/SĐT...</div>
+            </div>
+          `;
+          gsDropdown.classList.remove('is-hidden');
+        };
+
+        gsInput.addEventListener('focus', async () => {
+          if (!gsInput.value.trim()) {
+            if (!currentSachList.length || !currentDocGiaList.length) {
+              await Promise.all([loadSachList(), loadDocGiaList(), loadPhieuMuonList()]);
+            }
+            showEmptyState();
+          }
+        });
+
+        gsInput.addEventListener('input', (e) => {
+          const rawQuery = e.target.value.trim();
+          const query = removeVietnameseTones(rawQuery);
+          if (gsTimeout) clearTimeout(gsTimeout);
+          
+          if (!query) {
+            showEmptyState();
+            return;
+          }
+          
+          gsTimeout = setTimeout(async () => {
+            try {
+              const tasks = [];
+              if (!currentSachList || !currentSachList.length) tasks.push(loadSachList());
+              if (!currentDocGiaList || !currentDocGiaList.length) tasks.push(loadDocGiaList());
+              if (!currentPhieuMuonList || !currentPhieuMuonList.length) tasks.push(loadPhieuMuonList());
+              if (tasks.length) await Promise.all(tasks);
+
+              let html = '';
+              const now = new Date();
+              now.setHours(0,0,0,0);
+
+              if (query.includes('qua han') || query.includes('tre han') || query.includes('vi pham')) {
+                const overdue = (currentPhieuMuonList || []).filter(p => {
+                  if (getLoanStatus(p) !== 'dang') return false;
+                  const hanDate = new Date(p.ngay_han);
+                  hanDate.setHours(0,0,0,0);
+                  return hanDate < now;
+                });
+                html = `<div class="gs-section">Báo cáo Quá hạn</div>
+                        <div class="gs-item">
+                          <div class="gs-item-title" style="color: var(--red-700);">🚨 ${overdue.length} phiếu mượn quá hạn</div>
+                          <div class="gs-item-desc">Đang có ${overdue.length} sách chưa được trả đúng hạn.</div>
+                          <button class="gs-btn-action" onclick="document.querySelector('.nav-item[data-view=\\'phieu-muon\\']').click(); document.getElementById('globalSearchDropdown').classList.add('is-hidden'); document.getElementById('globalSearchInput').value='';">Xử lý ngay</button>
+                        </div>`;
+              } else if (query.includes('tien phat') || query.includes('no') || query.includes('phat')) {
+                const overdue = (currentPhieuMuonList || []).filter(p => getLoanStatus(p) === 'dang' && new Date(p.ngay_han) < new Date());
+                const totalFine = overdue.length * 5000;
+                html = `<div class="gs-section">Thống kê Tiền phạt</div>
+                        <div class="gs-item">
+                          <div class="gs-item-title">💰 Dự kiến thu: ${totalFine.toLocaleString('vi-VN')} VNĐ</div>
+                          <div class="gs-item-desc">Tính từ ${overdue.length} phiếu mượn đang quá hạn (5.000đ/phiếu).</div>
+                          <button class="gs-btn-action" onclick="document.querySelector('.nav-item[data-view=\\'phieu-muon\\']').click(); document.getElementById('globalSearchDropdown').classList.add('is-hidden'); document.getElementById('globalSearchInput').value='';">Xem danh sách phạt</button>
+                        </div>`;
+              } else if (query.includes('hot') || query.includes('bang xep hang') || query.includes('nhieu nhat')) {
+                const borrowCounts = {};
+                (currentPhieuMuonList || []).forEach(p => {
+                  borrowCounts[p.sach_id] = (borrowCounts[p.sach_id] || 0) + 1;
+                });
+                const sorted = Object.entries(borrowCounts).sort((a,b) => b[1] - a[1]);
+                let bestBook = null, count = 0;
+                if (sorted.length > 0) {
+                  count = sorted[0][1];
+                  bestBook = currentSachList.find(s => String(s.id) === String(sorted[0][0]));
+                }
+                
+                if (bestBook) {
+                  html = `<div class="gs-section">Sách Hot Nhất</div>
+                          <div class="gs-item">
+                            <div class="gs-item-title">🔥 ${escapeHtml(bestBook.ten_sach)}</div>
+                            <div class="gs-item-desc">Đã được mượn ${count} lần tính đến hiện tại.</div>
+                            <button class="gs-btn-action" onclick="document.querySelector('.nav-item[data-view=\\'kho-sach\\']').click(); openBookModal(${bestBook.id}); document.getElementById('globalSearchDropdown').classList.add('is-hidden'); document.getElementById('globalSearchInput').value='';">Xem thông tin Sách</button>
+                          </div>`;
+                } else {
+                  html = `<div class="gs-section">Sách Hot Nhất</div><div class="gs-item"><div class="gs-item-desc">Chưa có dữ liệu mượn sách.</div></div>`;
+                }
+              } else if (query.includes('het sach') || query.includes('het') || query.includes('ton kho') || query.includes('zero')) {
+                const outOfStock = (currentSachList || []).filter(s => s.so_luong <= 0);
+                html = `<div class="gs-section">Cảnh báo Tồn kho</div>
+                        <div class="gs-item">
+                          <div class="gs-item-title" style="color: var(--orange-600);">⚠️ ${outOfStock.length} đầu sách đã hết</div>
+                          <div class="gs-item-desc">Không còn cuốn nào trong kho để cho mượn.</div>
+                          <button class="gs-btn-action" onclick="document.querySelector('.nav-item[data-view=\\'kho-sach\\']').click(); document.getElementById('globalSearchDropdown').classList.add('is-hidden'); document.getElementById('globalSearchInput').value='';">Nhập thêm sách</button>
+                        </div>`;
+              } else {
+                const foundReader = (currentDocGiaList || []).find(d => 
+                  removeVietnameseTones(d.ma_doc_gia) === query || 
+                  removeVietnameseTones(d.so_dien_thoai) === query || 
+                  removeVietnameseTones(d.ho_ten).includes(query)
+                );
+                if (foundReader) {
+                  const readerLoans = (currentPhieuMuonList || []).filter(p => p.doc_gia_id === foundReader.id);
+                  const active = readerLoans.filter(p => getLoanStatus(p) === 'dang').length;
+                  const readerStr = btoa(encodeURIComponent(JSON.stringify(foundReader)));
+                  html = `<div class="gs-section">Tra cứu Độc giả</div>
+                          <div class="gs-item">
+                            <div class="gs-item-title">👤 ${escapeHtml(foundReader.ho_ten)} - ${escapeHtml(foundReader.ma_doc_gia)}</div>
+                            <div class="gs-item-desc">Đang mượn ${active} cuốn / Tổng ${readerLoans.length} lượt mượn.</div>
+                            <button class="gs-btn-action" onclick="document.querySelector('.nav-item[data-view=\\'doc-gia\\']').click(); openDocGiaProfile('${readerStr}'); document.getElementById('globalSearchDropdown').classList.add('is-hidden'); document.getElementById('globalSearchInput').value='';">Xem hồ sơ</button>
+                          </div>`;
+                } else if (query.includes('sach') || query.includes('tong')) {
+                  const totalBooks = (currentSachList || []).reduce((sum, s) => sum + s.so_luong, 0);
+                  const uniqueTitles = (currentSachList || []).length;
+                  html = `<div class="gs-section">Thống kê Kho Sách</div>
+                          <div class="gs-item">
+                            <div class="gs-item-title">📚 ${uniqueTitles} đầu sách (${totalBooks} cuốn)</div>
+                            <div class="gs-item-desc">Tổng số lượng sách đang được lưu trữ.</div>
+                            <button class="gs-btn-action" onclick="document.querySelector('.nav-item[data-view=\\'kho-sach\\']').click(); document.getElementById('globalSearchDropdown').classList.add('is-hidden'); document.getElementById('globalSearchInput').value='';">Mở tab Kho sách</button>
+                          </div>`;
+                } else {
+                  html = `<div class="gs-section">Không tìm thấy</div>
+                          <div class="gs-item" style="cursor:default;">
+                            <div class="gs-item-title">Không nhận diện được lệnh</div>
+                            <div class="gs-item-desc">Thử: "hot", "tien phat", "het sach", "qua han" hoặc nhập Mã SV/SĐT độc giả.</div>
+                          </div>`;
+                }
+              }
+
+              gsDropdown.innerHTML = html;
+              gsDropdown.classList.remove('is-hidden');
+            } catch (err) {
+              console.error("Lỗi trợ lý thống kê:", err);
+            }
+          }, 300);
+        });
+
+        document.addEventListener('click', (e) => {
+          if (gsContainer && !gsContainer.contains(e.target)) {
+            gsDropdown.classList.add('is-hidden');
+          }
+        });
+      }
     }
 
     function switchView(view) {
