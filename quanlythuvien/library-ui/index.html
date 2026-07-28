@@ -916,7 +916,7 @@ function renderBookGrid(sachList) {
     const spine = status === "available" ? "#3F7A5D" : "#A6432B";
 
     const coverHtml = sach.hinh_anh 
-      ? `<img src="${escapeHtml(sach.hinh_anh)}" alt="Cover" style="width:100%; height:100%; object-fit:cover; border-radius:9px;" />` 
+      ? `<img src="${escapeHtml(sach.hinh_anh)}" alt="Cover" style="width:100%; height:100%; object-fit:cover; border-radius:9px;" onerror="this.onerror=null; this.src='https://placehold.co/300x450/0f172a/ffffff?text=No+Image';" />` 
       : cover;
 
     const card = document.createElement("article");
@@ -1048,7 +1048,21 @@ function bindBookModalEvents() {
   });
   document.getElementById("bookForm")?.addEventListener("submit", submitBookForm);
 
-  // Image upload
+  // Image upload & Auto Fetch
+  document.getElementById("bookFormAutoFetchBtn")?.addEventListener("click", () => {
+    const title = document.getElementById("bookFormName")?.value.trim();
+    if (!title) {
+      showToast("Vui lòng nhập Tên sách trước khi tự động tìm ảnh.");
+      return;
+    }
+    const keyword = encodeURIComponent(title);
+    // Sử dụng AI tạo ảnh miễn phí (Pollinations AI) để hỗ trợ tốt tiếng Việt
+    const url = `https://image.pollinations.ai/prompt/book%20cover%20${keyword}?width=400&height=600&nologo=true`;
+    document.getElementById("bookFormImageStr").value = url;
+    updateImagePreview();
+    showToast("Đang tạo ảnh bằng AI... Quá trình này có thể mất vài giây để load ảnh.");
+  });
+
   document.getElementById("bookFormUploadBtn")?.addEventListener("click", () => {
     document.getElementById("bookFormFile")?.click();
   });
@@ -1070,7 +1084,7 @@ function openBookModal(sach) {
   const cover = soLuong > 0 ? "\ud83d\udcd7" : "\ud83d\udcd5";
 
   const coverHtml = sach.hinh_anh 
-    ? `<img src="${escapeHtml(sach.hinh_anh)}" style="width:100px; height:140px; object-fit:cover; border-radius:9px;" />` 
+    ? `<img src="${escapeHtml(sach.hinh_anh)}" style="width:100px; height:140px; object-fit:cover; border-radius:9px;" onerror="this.onerror=null; this.src='https://placehold.co/300x450/0f172a/ffffff?text=No+Image';" />` 
     : cover;
 
   document.getElementById("bookModalCover").innerHTML = coverHtml;
@@ -1111,6 +1125,23 @@ function openBookForm(sach = null) {
     document.getElementById("bookFormId").value = "";
     document.getElementById("bookFormQty").value = 1;
   }
+  
+  // Render Preset Covers
+  const presetContainer = document.getElementById("presetCoversContainer");
+  if (presetContainer) {
+    const presets = [
+      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&h=600&fit=crop", // Book stack
+      "https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=400&h=600&fit=crop", // Open book
+      "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=400&h=600&fit=crop", // Library
+      "https://images.unsplash.com/photo-1456953180671-730de08edaa7?q=80&w=400&h=600&fit=crop", // Vintage book
+      "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=400&h=600&fit=crop", // Coffee and book
+      "https://images.unsplash.com/photo-1550399105-c4db5fb85c18?q=80&w=400&h=600&fit=crop"  // Minimal book
+    ];
+    presetContainer.innerHTML = presets.map(url => 
+      `<img src="${url}" class="preset-cover" style="width:36px; height:48px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--line-200);" onclick="document.getElementById('bookFormImageStr').value='${url}'; updateImagePreview();" />`
+    ).join("");
+  }
+
   updateImagePreview();
   document.getElementById("bookFormBackdrop").classList.add("show");
 }
@@ -1123,7 +1154,7 @@ function updateImagePreview() {
   const imageStr = document.getElementById("bookFormImageStr").value.trim();
   const preview = document.getElementById("bookFormImagePreview");
   if (imageStr) {
-    preview.innerHTML = `<img src="${escapeHtml(imageStr)}" style="width:100%; height:100%; object-fit:cover;" />`;
+    preview.innerHTML = `<img src="${escapeHtml(imageStr)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='https://placehold.co/300x450/0f172a/ffffff?text=No+Image';" />`;
   } else {
     preview.innerHTML = `<span>Trống</span>`;
   }
@@ -1740,15 +1771,26 @@ async function submitCancelConfirm() {
           <input type="number" id="bookFormQty" required min="0" />
         </label>
       </div>
-      <label class="auth-field">
-        <span>Ảnh minh họa (Base64 hoặc URL)</span>
+      <label class="auth-field" style="margin-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="margin-bottom: 0;">Ảnh minh họa (Base64 hoặc URL)</span>
+          <button type="button" class="btn-ghost" id="bookFormAutoFetchBtn" style="padding: 2px 8px; font-size: 11px;">Tự động tìm ảnh bìa</button>
+        </div>
         <div style="display: flex; gap: 8px;">
           <input type="text" id="bookFormImageStr" placeholder="Nhập URL hoặc chuỗi Base64..." style="flex: 1;" />
           <button type="button" class="btn-ghost" id="bookFormUploadBtn" style="padding: 0 12px;">Tải file</button>
           <input type="file" id="bookFormFile" accept="image/*" style="display: none;" />
         </div>
-        <div id="bookFormImagePreview" style="margin-top: 8px; width: 60px; height: 80px; background: var(--line-200); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted-500);">
-          <span>Trống</span>
+        <div style="margin-top: 10px; display: flex; gap: 12px; align-items: flex-start;">
+          <div id="bookFormImagePreview" style="width: 60px; height: 80px; background: var(--line-200); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted-500); flex-shrink: 0;">
+            <span>Trống</span>
+          </div>
+          <div class="preset-covers" style="flex: 1;">
+            <span style="display: block; font-size: 11px; color: var(--muted-700); margin-bottom: 4px;">Ảnh bìa mẫu (Click để chọn):</span>
+            <div id="presetCoversContainer" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;">
+              <!-- Javascript will populate this -->
+            </div>
+          </div>
         </div>
       </label>
       <p class="loan-confirm__error is-hidden" id="bookFormError"></p>
