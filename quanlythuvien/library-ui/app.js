@@ -38,8 +38,27 @@ function resolveApiBase() {
 const API_BASE = resolveApiBase();
 console.log("Backend API:", API_BASE);
 
-let accessToken = null;
+let accessToken = localStorage.getItem("accessToken") || null;
+let currentUser = localStorage.getItem("currentUser") || null;
 let toastTimer = null;
+let inactivityTimeout = null;
+const INACTIVITY_LIMIT = 30 * 60 * 1000; // 30 minutes
+
+function resetInactivityTimer() {
+  if (!accessToken) return;
+  if (inactivityTimeout) clearTimeout(inactivityTimeout);
+  inactivityTimeout = setTimeout(() => {
+    handleLogout();
+    setLoginMessage("Phiên đăng nhập đã hết hạn do bạn không hoạt động trong 30 phút.");
+  }, INACTIVITY_LIMIT);
+}
+
+function setupInactivityTracker() {
+  ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(evt => 
+    document.addEventListener(evt, resetInactivityTimer, { passive: true })
+  );
+  resetInactivityTimer();
+}
 
 const el = {};
 
@@ -66,6 +85,11 @@ document.addEventListener("DOMContentLoaded", () => {
   bindAuthEvents();
   bindDashboardEvents();
   restoreRememberedUsername();
+
+  if (accessToken && currentUser) {
+    showProtectedApp({ username: currentUser });
+    setupInactivityTracker();
+  }
 });
 
 /* ========================================================================
@@ -110,10 +134,13 @@ async function handleLogin(event) {
     }
 
     accessToken = response.access_token;
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("currentUser", username);
     saveRememberedUsername(username, rememberMe);
     el.password.value = "";
 
     showProtectedApp({ username });
+    setupInactivityTracker();
     showToast("Đăng nhập thành công.");
   } catch (error) {
     console.error("Lỗi đăng nhập:", error);
@@ -126,6 +153,11 @@ async function handleLogin(event) {
 
 function handleLogout() {
   accessToken = null;
+  currentUser = null;
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("currentUser");
+  if (inactivityTimeout) clearTimeout(inactivityTimeout);
+  
   el.password.value = "";
   closeSidebar();
   showLoginScreen("Bạn đã đăng xuất.");
