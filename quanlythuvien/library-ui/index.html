@@ -1,539 +1,1478 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Kho sách | Thư viện số</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
-<style>
-:root{
-    --navy-950:#131B33;
-    --navy-800:#1D2748;
-    --navy-700:#26315A;
-    --amber-500:#D9A441;
-    --amber-600:#BF8B2E;
-    --ink-900:#22252B;
-    --paper-50:#F6F3EA;
-    --paper-100:#FFFFFF;
-    --line-200:#E7E1D3;
-    --muted-500:#8B8677;
-    --muted-700:#5C594E;
-    --stamp-borrowed:#A6432B;
-    --stamp-returned:#5C6B8A;
-    --stamp-available:#3F7A5D;
-    --radius-card:14px;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kho sách | Thư viện số</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --navy-950: #131B33;
+      --navy-800: #1D2748;
+      --navy-700: #26315A;
+      --amber-500: #D9A441;
+      --amber-600: #BF8B2E;
+      --ink-900: #22252B;
+      --paper-50: #F6F3EA;
+      --paper-100: #FFFFFF;
+      --line-200: #E7E1D3;
+      --muted-500: #8B8677;
+      --muted-700: #5C594E;
+      --stamp-borrowed: #A6432B;
+      --stamp-returned: #5C6B8A;
+      --stamp-available: #3F7A5D;
+      --radius-card: 14px;
+    }
 
-  .is-hidden{display:none !important;}
+    .is-hidden {
+      display: none !important;
+    }
 
-  *{box-sizing:border-box;}
-  body{margin:0;font-family:'Inter',sans-serif;color:var(--ink-900);background:var(--paper-50);}
-  h1,h2,h3{font-family:'Fraunces',serif;margin:0;}
-  .mono{font-family:'IBM Plex Mono',monospace;}
+    * {
+      box-sizing: border-box;
+    }
 
-  .icon{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      color: var(--ink-900);
+      background: var(--paper-50);
+    }
 
-  /* ---------- Layout shell ---------- */
-  .shell{display:flex;min-height:100vh;}
+    h1,
+    h2,
+    h3 {
+      font-family: 'Fraunces', serif;
+      margin: 0;
+    }
 
-  /* ---------- Sidebar ---------- */
-  .sidebar{
-    width:250px;flex-shrink:0;background:var(--navy-950);color:#C7CEDD;
-    display:flex;flex-direction:column;padding:22px 14px;position:fixed;top:0;bottom:0;left:0;
-    transition:transform .25s ease;z-index:40;
-  }
-  .brand{display:flex;align-items:center;gap:10px;padding:6px 10px 22px;color:#fff;}
-  .sidebar__head{display:flex;align-items:center;justify-content:space-between;}
-  .sidebar-close{
-    display:none;background:none;border:none;color:#8993B5;cursor:pointer;padding:8px;
-    border-radius:8px;flex-shrink:0;
-  }
-  .sidebar-close:hover{background:var(--navy-800);color:#fff;}
+    .mono {
+      font-family: 'IBM Plex Mono', monospace;
+    }
 
-  .sidebar-backdrop{
-    display:none;position:fixed;inset:0;background:rgba(19,27,51,.45);z-index:30;
-  }
-  .sidebar-backdrop.show{display:block;}
-  .book-modal-backdrop{
-    display:none;position:fixed;inset:0;z-index:50;
-    background:rgba(19,27,51,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
-    align-items:center;justify-content:center;padding:20px;
-  }
-  .book-modal-backdrop.show{display:flex;}
-  .book-modal{
-    background:var(--paper,#F7F3EA);border-radius:14px;max-width:420px;width:100%;
-    padding:28px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.35);
-  }
-  .book-modal__close{
-    position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;
-    font-size:18px;color:#8993B5;padding:6px;border-radius:8px;
-  }
-  .book-modal__close:hover{background:rgba(0,0,0,.06);}
-  .book-modal__cover{font-size:34px;margin-bottom:10px;}
-  .book-modal h3{font-size:20px;margin:0 0 6px;}
-  .book-modal__row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.08);font-size:14px;}
-  .book-modal__row:last-child{border-bottom:none;}
-  .book-modal__row span:first-child{color:#8993B5;}
-  .book-modal__row span:last-child{font-weight:600;}
-  .brand__mark{
-    width:34px;height:34px;border-radius:9px;background:var(--amber-500);
-    display:flex;align-items:center;justify-content:center;color:var(--navy-950);font-weight:700;
-    font-family:'Fraunces',serif;font-size:16px;
-  }
-  .brand__text strong{display:block;font-family:'Fraunces',serif;font-size:15px;letter-spacing:.02em;}
-  .brand__text small{display:block;color:#8993B5;font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+    .icon {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
 
-  .nav-label{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6E7999;margin:14px 12px 8px;}
-  .nav-item{
-    display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;
-    color:#B7C0DC;text-decoration:none;font-size:14px;font-weight:500;margin-bottom:2px;
-    border-left:3px solid transparent;
-  }
-  .nav-item:hover{background:var(--navy-800);color:#fff;}
-  .nav-item.active{background:var(--navy-800);color:#fff;border-left-color:var(--amber-500);}
-  .nav-item.active .icon{color:var(--amber-500);}
+    /* ---------- Layout shell ---------- */
+    .shell {
+      display: flex;
+      min-height: 100vh;
+    }
 
-  .sidebar__footer{margin-top:auto;padding:12px;border-top:1px solid var(--navy-800);}
-  .sidebar__footer p{font-size:12px;color:#7982A3;margin:0;line-height:1.5;}
+    /* ---------- Sidebar ---------- */
+    .sidebar {
+      width: 250px;
+      flex-shrink: 0;
+      background: var(--navy-950);
+      color: #C7CEDD;
+      display: flex;
+      flex-direction: column;
+      padding: 22px 14px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      transition: transform .25s ease;
+      z-index: 40;
+    }
 
-  /* ---------- Topbar ---------- */
-  .main{flex:1;margin-left:250px;display:flex;flex-direction:column;min-height:100vh;}
-  .topbar{
-    height:66px;background:#fff;border-bottom:1px solid var(--line-200);
-    display:flex;align-items:center;gap:16px;padding:0 26px;position:sticky;top:0;z-index:20;
-  }
-  .menu-toggle{display:none;background:none;border:none;color:var(--ink-900);cursor:pointer;padding:6px;}
-  .search-global{
-    flex:1;max-width:380px;display:flex;align-items:center;gap:8px;
-    background:var(--paper-50);border:1px solid var(--line-200);border-radius:10px;padding:9px 12px;color:var(--muted-700);
-  }
-  .search-global input{border:none;background:none;outline:none;font:inherit;color:var(--ink-900);width:100%;font-size:13.5px;}
-  .search-global .icon{color:var(--muted-500);}
-  .topbar__spacer{flex:1;}
-  .icon-btn{
-    width:38px;height:38px;border-radius:10px;border:1px solid var(--line-200);background:#fff;
-    display:flex;align-items:center;justify-content:center;color:var(--muted-700);cursor:pointer;position:relative;
-  }
-  .icon-btn .dot{position:absolute;top:8px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--stamp-borrowed);border:1.5px solid #fff;}
-  .user-chip{display:flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;border-radius:12px;cursor:pointer;}
-  .user-chip:hover{background:var(--paper-50);}
-  .user-avatar{
-    width:34px;height:34px;border-radius:50%;background:var(--navy-950);color:var(--amber-500);
-    display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:13px;
-  }
-  .user-chip__text strong{display:block;font-size:13.5px;line-height:1.3;}
-  .user-chip__text small{display:block;font-size:11.5px;color:var(--muted-500);}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px 22px;
+      color: #fff;
+    }
 
-  /* ---------- Content panel ---------- */
-  .content{padding:26px 30px 60px;flex:1;}
-  .panel{background:#fff;border:1px solid var(--line-200);border-radius:16px;overflow:hidden;}
+    .sidebar__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-  .panel__head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 4px;}
-  .panel__head h1{font-size:22px;color:var(--ink-900);}
-  .panel__head .icon-btn{width:30px;height:30px;border-radius:50%;}
+    .sidebar-close {
+      display: none;
+      background: none;
+      border: none;
+      color: #8993B5;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
 
-  .filter-row{
-    display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:16px 24px 18px;border-bottom:1px solid var(--line-200);
-  }
-  .field{
-    display:flex;align-items:center;gap:8px;background:var(--paper-50);border:1px solid var(--line-200);
-    border-radius:10px;padding:9px 12px;font-size:13.5px;color:var(--muted-700);
-  }
-  .field.grow{flex:1;min-width:220px;}
-  .field input{border:none;background:none;outline:none;font:inherit;color:var(--ink-900);width:100%;}
-  .field .icon{color:var(--muted-500);}
-  .field--year input{width:70px;}
-  .btn-primary{
-    background:var(--navy-950);color:#fff;border:none;border-radius:10px;padding:10px 20px;
-    font-size:13.5px;font-weight:600;cursor:pointer;letter-spacing:.01em;
-  }
-  .btn-primary:hover{background:var(--navy-800);}
+    .sidebar-close:hover {
+      background: var(--navy-800);
+      color: #fff;
+    }
 
-  .tabs{display:flex;gap:26px;padding:0 24px;border-bottom:1px solid var(--line-200);overflow-x:auto;}
-  .tab{
-    padding:14px 2px;font-size:13.5px;font-weight:600;color:var(--muted-500);cursor:pointer;
-    border-bottom:2.5px solid transparent;white-space:nowrap;
-  }
-  .tab.active{color:var(--amber-600);border-bottom-color:var(--amber-500);}
-  .tab .count{color:var(--muted-500);font-weight:500;}
-  .tab.active .count{color:var(--amber-600);}
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(19, 27, 51, .45);
+      z-index: 30;
+    }
 
-  /* ---------- Card grid ---------- */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;padding:22px 24px 28px;}
-  .book-card{
-    position:relative;border:1px solid var(--line-200);border-radius:var(--radius-card);
-    background:#fff;padding:18px 18px 16px;overflow:hidden;
-    border-left:5px solid var(--spine, #6E7999);
-  }
-  .book-card__top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-  .book-card__cover{
-    width:42px;height:42px;border-radius:9px;background:var(--spine,#6E7999);
-    display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0;
-  }
-  .stamp{
-    font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.05em;font-weight:600;
-    padding:5px 8px;border:1.5px dashed currentColor;border-radius:6px;transform:rotate(-7deg);
-    text-transform:uppercase;white-space:nowrap;margin-top:2px;
-  }
-  .stamp--borrowed{color:var(--stamp-borrowed);}
-  .stamp--returned{color:var(--stamp-returned);}
-  .stamp--available{color:var(--stamp-available);}
+    .sidebar-backdrop.show {
+      display: block;
+    }
 
-  .book-card h3{font-size:16.5px;margin-top:14px;line-height:1.3;color:var(--ink-900);}
-  .book-card__author{display:flex;align-items:center;gap:6px;color:var(--muted-700);font-size:13px;margin-top:6px;}
-  .book-card__meta{display:flex;align-items:center;gap:6px;color:var(--muted-500);font-size:12px;margin-top:10px;font-family:'IBM Plex Mono',monospace;}
-  .book-card__meta .dot-sep{width:3px;height:3px;border-radius:50%;background:var(--muted-500);}
-  .book-card__foot{
-    display:flex;align-items:center;justify-content:space-between;margin-top:14px;
-    padding-top:12px;border-top:1px solid var(--line-200);
-  }
-  .book-card__qty{font-size:12px;color:var(--muted-500);}
-  .book-card__link{font-size:12.5px;font-weight:600;color:var(--navy-950);text-decoration:none;display:flex;align-items:center;gap:4px;}
-  .book-card__link:hover{color:var(--amber-600);}
+    .book-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(19, 27, 51, .55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
 
-  /* ---------- Responsive ---------- */
-  /* ---------- Login gate ---------- */
-  .auth-page{
-    min-height:100vh;display:flex;background:var(--navy-950);
-  }
-  .auth-page__visual{
-    flex:1;padding:56px 52px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;
-  }
-  .auth-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;}
-  .auth-brand__mark{
-    width:42px;height:42px;border-radius:11px;background:var(--amber-500);
-    display:flex;align-items:center;justify-content:center;color:var(--navy-950);font-weight:700;
-    font-family:'Fraunces',serif;font-size:19px;
-  }
-  .auth-brand strong{display:block;font-family:'Fraunces',serif;font-size:16px;}
-  .auth-brand small{display:block;color:#8993B5;font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
-  .auth-intro{max-width:400px;}
-  .auth-badge{
-    display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;
-    color:var(--amber-500);border:1px solid rgba(217,164,65,.4);padding:5px 10px;border-radius:20px;margin-bottom:18px;
-  }
-  .auth-intro h1{color:#fff;font-size:30px;line-height:1.25;margin-bottom:14px;}
-  .auth-intro p{color:#A9B2CE;font-size:14.5px;line-height:1.6;margin:0;}
-  .auth-copyright{color:#5C6689;font-size:12px;}
+    .book-modal-backdrop.show {
+      display: flex;
+    }
 
-  .auth-page__form{
-    width:440px;flex-shrink:0;background:var(--paper-50);display:flex;align-items:center;justify-content:center;padding:32px;
-  }
-  .login-card{width:100%;max-width:340px;}
-  .login-card .eyebrow{
-    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--amber-600);
-    text-transform:uppercase;margin-bottom:8px;
-  }
-  .login-card h2{font-size:24px;margin-bottom:6px;}
-  .login-card__desc{color:var(--muted-700);font-size:13.5px;margin:0 0 24px;}
-  .auth-field{display:block;margin-bottom:16px;}
-  .auth-field span{display:block;font-size:12.5px;font-weight:600;color:var(--muted-700);margin-bottom:6px;}
-  .auth-field input{
-    width:100%;padding:11px 13px;border:1px solid var(--line-200);border-radius:10px;
-    font:inherit;font-size:13.5px;background:#fff;outline:none;
-  }
-  .auth-field input:focus{border-color:var(--amber-500);}
-  .login-options{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;font-size:12.5px;}
-  .login-options label{display:flex;align-items:center;gap:6px;color:var(--muted-700);}
-  .auth-submit{
-    width:100%;background:var(--navy-950);color:#fff;border:none;border-radius:10px;padding:12px;
-    font-size:14px;font-weight:600;cursor:pointer;
-  }
-  .auth-submit:hover{background:var(--navy-800);}
-  .login-message{min-height:18px;font-size:12.5px;color:var(--stamp-borrowed);margin:10px 0 0;}
+    .book-modal {
+      background: var(--paper, #F7F3EA);
+      border-radius: 14px;
+      max-width: 420px;
+      width: 100%;
+      padding: 28px;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+    }
 
-  .auth-field__control{position:relative;display:block;}
-  .auth-field__control input{padding-right:42px;}
-  .password-toggle{
-    position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;
-    cursor:pointer;font-size:15px;padding:4px;color:var(--muted-500);
-  }
+    .book-modal__close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #8993B5;
+      padding: 6px;
+      border-radius: 8px;
+    }
 
-  .auth-toast{
-    position:fixed;bottom:26px;left:50%;transform:translate(-50%,20px);
-    background:var(--navy-950);color:#fff;padding:12px 20px;border-radius:10px;font-size:13.5px;
-    opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:60;
-    box-shadow:0 10px 30px rgba(19,27,51,.25);
-  }
-  .auth-toast.is-visible{opacity:1;transform:translate(-50%,0);}
+    .book-modal__close:hover {
+      background: rgba(0, 0, 0, .06);
+    }
 
-  @media (max-width: 860px){
-    .auth-page{flex-direction:column;}
-    .auth-page__visual{padding:32px 24px;}
-    .auth-page__form{width:100%;padding:24px;}
-  }
+    .book-modal__cover {
+      font-size: 34px;
+      margin-bottom: 10px;
+    }
 
-  @media (max-width: 900px){
-    .sidebar{transform:translateX(-100%);}
-    .sidebar.open{transform:translateX(0);}
-    .main{margin-left:0;}
-    .menu-toggle{display:flex;}
-    .search-global{max-width:none;}
-    .sidebar-close{display:flex;}
-  }
-  @media (max-width: 560px){
-    .filter-row{flex-direction:column;align-items:stretch;}
-    .field.grow{min-width:0;}
-    .btn-primary{width:100%;}
-    .content{padding:16px;}
-    .topbar{padding:0 14px;}
-  }
+    .book-modal h3 {
+      font-size: 20px;
+      margin: 0 0 6px;
+    }
 
-  :focus-visible{outline:2.5px solid var(--amber-500);outline-offset:2px;}
-  /* ---------- Phiếu mượn ---------- */
-  .loan-layout{display:flex;align-items:flex-start;gap:24px;padding:18px 24px 28px;}
+    .book-modal__row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, .08);
+      font-size: 14px;
+    }
 
-  .loan-main{flex:1 1 60%;min-width:0;}
+    .book-modal__row:last-child {
+      border-bottom: none;
+    }
 
-  .loan-reader-select{margin-bottom:16px;}
-  .loan-reader-select label{display:block;font-size:12.5px;font-weight:600;color:var(--muted-700);margin-bottom:6px;}
-  .loan-reader-select select{
-    width:100%;max-width:360px;padding:10px 12px;border:1px solid var(--line-200);border-radius:10px;
-    font:inherit;font-size:13.5px;background:#fff;color:var(--ink-900);
-  }
-  .loan-reader-select select:focus{outline:none;border-color:var(--amber-500);}
-  .loan-reader-hint{margin:8px 0 0;font-size:12px;color:var(--muted-500);}
+    .book-modal__row span:first-child {
+      color: #8993B5;
+    }
 
-  .loan-table-wrap{overflow-x:auto;border:1px solid var(--line-200);border-radius:12px;}
-  .loan-table{width:100%;border-collapse:collapse;font-size:13.5px;}
-  .loan-table thead th{
-    text-align:left;color:var(--muted-500);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;
-    padding:10px 12px;border-bottom:1px solid var(--line-200);background:var(--paper-50);
-  }
-  .loan-table tbody td{padding:10px 12px;border-bottom:1px solid var(--line-200);vertical-align:middle;color:var(--ink-900);}
-  .loan-table tbody tr:last-child td{border-bottom:none;}
-  .loan-table__author{color:var(--muted-700);}
-  .loan-table__qty{font-family:'IBM Plex Mono',monospace;}
-  .loan-table__qty--out{color:var(--stamp-borrowed);font-weight:600;}
+    .book-modal__row span:last-child {
+      font-weight: 600;
+    }
 
-  .btn-borrow{
-    background:var(--navy-950);color:#fff;border:none;border-radius:8px;padding:7px 14px;
-    font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;
-  }
-  .btn-borrow:hover:not(:disabled){background:var(--navy-800);}
-  .btn-borrow:disabled{background:var(--line-200);color:var(--muted-500);cursor:not-allowed;}
+    .brand__mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--amber-500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--navy-950);
+      font-weight: 700;
+      font-family: 'Fraunces', serif;
+      font-size: 16px;
+    }
 
-  .btn-ghost{
-    background:none;border:1px solid var(--line-200);border-radius:10px;padding:9px 16px;
-    font-size:13px;font-weight:600;color:var(--muted-700);cursor:pointer;
-  }
-  .btn-ghost:hover{background:var(--paper-50);}
+    .brand__text strong {
+      display: block;
+      font-family: 'Fraunces', serif;
+      font-size: 15px;
+      letter-spacing: .02em;
+    }
 
-  .loan-history{
-    flex:0 0 340px;background:var(--paper-50);border:1px solid var(--line-200);border-radius:12px;
-    padding:16px;max-height:620px;display:flex;flex-direction:column;
-  }
-  .loan-history__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-  .loan-history__head h2{font-size:15.5px;}
-  .loan-history__list{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px;padding-right:2px;}
-  .loan-history__item{background:#fff;border:1px solid var(--line-200);border-radius:10px;padding:10px 12px;}
-  .loan-history__item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
-  .loan-history__title{font-weight:600;font-size:13.5px;color:var(--ink-900);line-height:1.3;}
-  .loan-history__meta{color:var(--muted-500);font-size:11.5px;margin-top:6px;line-height:1.5;}
+    .brand__text small {
+      display: block;
+      color: #8993B5;
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
 
-  .loan-status{
-    font-size:10.5px;padding:3px 9px;border-radius:999px;font-weight:600;white-space:nowrap;flex-shrink:0;
-  }
-  .loan-status--dang{background:rgba(217,164,65,.18);color:var(--amber-600);}
-  .loan-status--tra{background:rgba(63,122,93,.18);color:var(--stamp-available);}
-  .loan-status--huy{background:rgba(196,72,72,.16);color:var(--stamp-borrowed);}
+    .nav-label {
+      font-size: 11px;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: #6E7999;
+      margin: 14px 12px 8px;
+    }
 
-  .loan-history__cancel-wrap{margin-top:10px;text-align:right;}
-  .btn-cancel-loan{
-    background:none;border:1px solid var(--stamp-borrowed);color:var(--stamp-borrowed);border-radius:8px;
-    padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;
-  }
-  .btn-cancel-loan:hover{background:rgba(196,72,72,.08);}
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #B7C0DC;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+      border-left: 3px solid transparent;
+    }
 
-  .btn-danger{
-    background:var(--stamp-borrowed);color:#fff;border:none;border-radius:10px;padding:9px 16px;
-    font-size:13px;font-weight:600;cursor:pointer;
-  }
-  .btn-danger:hover:not(:disabled){filter:brightness(.92);}
-  .btn-danger:disabled{opacity:.65;cursor:not-allowed;}
+    .nav-item:hover {
+      background: var(--navy-800);
+      color: #fff;
+    }
 
-  .loan-confirm__error{color:var(--stamp-borrowed);font-size:12.5px;margin:10px 0 0;}
-  .loan-confirm__actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+    .nav-item.active {
+      background: var(--navy-800);
+      color: #fff;
+      border-left-color: var(--amber-500);
+    }
 
-  .loan-success-modal{text-align:center;}
-  .loan-success__icon{font-size:38px;margin-bottom:8px;}
-  .loan-success__desc{color:var(--muted-700);font-size:13.5px;margin:4px 0 18px;}
-  .loan-success__ok{width:100%;}
+    .nav-item.active .icon {
+      color: var(--amber-500);
+    }
 
-  @media (max-width: 900px){
-    .loan-layout{flex-direction:column;}
-    .loan-history{flex:1 1 auto;width:100%;max-height:360px;}
-  }
+    .sidebar__footer {
+      margin-top: auto;
+      padding: 12px;
+      border-top: 1px solid var(--navy-800);
+    }
 
-  @media (prefers-reduced-motion: reduce){*{transition:none !important;}}
+    .sidebar__footer p {
+      font-size: 12px;
+      color: #7982A3;
+      margin: 0;
+      line-height: 1.5;
+    }
 
-</style>
+    /* ---------- Topbar ---------- */
+    .main {
+      flex: 1;
+      margin-left: 250px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 66px;
+      background: #fff;
+      border-bottom: 1px solid var(--line-200);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 26px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--ink-900);
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    .search-global {
+      flex: 1;
+      max-width: 380px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--paper-50);
+      border: 1px solid var(--line-200);
+      border-radius: 10px;
+      padding: 9px 12px;
+      color: var(--muted-700);
+    }
+
+    .search-global input {
+      border: none;
+      background: none;
+      outline: none;
+      font: inherit;
+      color: var(--ink-900);
+      width: 100%;
+      font-size: 13.5px;
+    }
+
+    .search-global .icon {
+      color: var(--muted-500);
+    }
+
+    .topbar__spacer {
+      flex: 1;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--line-200);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted-700);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .icon-btn .dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--stamp-borrowed);
+      border: 1.5px solid #fff;
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px 6px 6px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .user-chip:hover {
+      background: var(--paper-50);
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--navy-950);
+      color: var(--amber-500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .user-chip__text strong {
+      display: block;
+      font-size: 13.5px;
+      line-height: 1.3;
+    }
+
+    .user-chip__text small {
+      display: block;
+      font-size: 11.5px;
+      color: var(--muted-500);
+    }
+
+    /* ---------- Content panel ---------- */
+    .content {
+      padding: 26px 30px 60px;
+      flex: 1;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--line-200);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .panel__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 4px;
+    }
+
+    .panel__head h1 {
+      font-size: 22px;
+      color: var(--ink-900);
+    }
+
+    .panel__head .icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 24px 18px;
+      border-bottom: 1px solid var(--line-200);
+    }
+
+    .field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--paper-50);
+      border: 1px solid var(--line-200);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 13.5px;
+      color: var(--muted-700);
+    }
+
+    .field.grow {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .field input {
+      border: none;
+      background: none;
+      outline: none;
+      font: inherit;
+      color: var(--ink-900);
+      width: 100%;
+    }
+
+    .field .icon {
+      color: var(--muted-500);
+    }
+
+    .field--year input {
+      width: 70px;
+    }
+
+    .btn-primary {
+      background: var(--navy-950);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: .01em;
+    }
+
+    .btn-primary:hover {
+      background: var(--navy-800);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 26px;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--line-200);
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 14px 2px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--muted-500);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      color: var(--amber-600);
+      border-bottom-color: var(--amber-500);
+    }
+
+    .tab .count {
+      color: var(--muted-500);
+      font-weight: 500;
+    }
+
+    .tab.active .count {
+      color: var(--amber-600);
+    }
+
+    /* ---------- Card grid ---------- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 18px;
+      padding: 22px 24px 28px;
+    }
+
+    .book-card {
+      position: relative;
+      border: 1px solid var(--line-200);
+      border-radius: var(--radius-card);
+      background: #fff;
+      padding: 18px 18px 16px;
+      overflow: hidden;
+      border-left: 5px solid var(--spine, #6E7999);
+    }
+
+    .book-card__top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .book-card__cover {
+      width: 42px;
+      height: 42px;
+      border-radius: 9px;
+      background: var(--spine, #6E7999);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .stamp {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: .05em;
+      font-weight: 600;
+      padding: 5px 8px;
+      border: 1.5px dashed currentColor;
+      border-radius: 6px;
+      transform: rotate(-7deg);
+      text-transform: uppercase;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    .stamp--borrowed {
+      color: var(--stamp-borrowed);
+    }
+
+    .stamp--returned {
+      color: var(--stamp-returned);
+    }
+
+    .stamp--available {
+      color: var(--stamp-available);
+    }
+
+    .book-card h3 {
+      font-size: 16.5px;
+      margin-top: 14px;
+      line-height: 1.3;
+      color: var(--ink-900);
+    }
+
+    .book-card__author {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted-700);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .book-card__meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted-500);
+      font-size: 12px;
+      margin-top: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .book-card__meta .dot-sep {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--muted-500);
+    }
+
+    .book-card__foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line-200);
+    }
+
+    .book-card__qty {
+      font-size: 12px;
+      color: var(--muted-500);
+    }
+
+    .book-card__link {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--navy-950);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .book-card__link:hover {
+      color: var(--amber-600);
+    }
+
+    /* ---------- Responsive ---------- */
+    /* ---------- Login gate ---------- */
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      background: var(--navy-950);
+    }
+
+    .auth-page__visual {
+      flex: 1;
+      padding: 56px 52px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #fff;
+    }
+
+    .auth-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .auth-brand__mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      background: var(--amber-500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--navy-950);
+      font-weight: 700;
+      font-family: 'Fraunces', serif;
+      font-size: 19px;
+    }
+
+    .auth-brand strong {
+      display: block;
+      font-family: 'Fraunces', serif;
+      font-size: 16px;
+    }
+
+    .auth-brand small {
+      display: block;
+      color: #8993B5;
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .auth-intro {
+      max-width: 400px;
+    }
+
+    .auth-badge {
+      display: inline-block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .08em;
+      color: var(--amber-500);
+      border: 1px solid rgba(217, 164, 65, .4);
+      padding: 5px 10px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+    }
+
+    .auth-intro h1 {
+      color: #fff;
+      font-size: 30px;
+      line-height: 1.25;
+      margin-bottom: 14px;
+    }
+
+    .auth-intro p {
+      color: #A9B2CE;
+      font-size: 14.5px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .auth-copyright {
+      color: #5C6689;
+      font-size: 12px;
+    }
+
+    .auth-page__form {
+      width: 440px;
+      flex-shrink: 0;
+      background: var(--paper-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .login-card .eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .08em;
+      color: var(--amber-600);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .login-card h2 {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .login-card__desc {
+      color: var(--muted-700);
+      font-size: 13.5px;
+      margin: 0 0 24px;
+    }
+
+    .auth-field {
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .auth-field span {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--muted-700);
+      margin-bottom: 6px;
+    }
+
+    .auth-field input {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1px solid var(--line-200);
+      border-radius: 10px;
+      font: inherit;
+      font-size: 13.5px;
+      background: #fff;
+      outline: none;
+    }
+
+    .auth-field input:focus {
+      border-color: var(--amber-500);
+    }
+
+    .login-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 12.5px;
+    }
+
+    .login-options label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted-700);
+    }
+
+    .auth-submit {
+      width: 100%;
+      background: var(--navy-950);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .auth-submit:hover {
+      background: var(--navy-800);
+    }
+
+    .login-message {
+      min-height: 18px;
+      font-size: 12.5px;
+      color: var(--stamp-borrowed);
+      margin: 10px 0 0;
+    }
+
+    .auth-field__control {
+      position: relative;
+      display: block;
+    }
+
+    .auth-field__control input {
+      padding-right: 42px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      padding: 4px;
+      color: var(--muted-500);
+    }
+
+    .auth-toast {
+      position: fixed;
+      bottom: 26px;
+      left: 50%;
+      transform: translate(-50%, 20px);
+      background: var(--navy-950);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 60;
+      box-shadow: 0 10px 30px rgba(19, 27, 51, .25);
+    }
+
+    .auth-toast.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 860px) {
+      .auth-page {
+        flex-direction: column;
+      }
+
+      .auth-page__visual {
+        padding: 32px 24px;
+      }
+
+      .auth-page__form {
+        width: 100%;
+        padding: 24px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: flex;
+      }
+
+      .search-global {
+        max-width: none;
+      }
+
+      .sidebar-close {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .filter-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .field.grow {
+        min-width: 0;
+      }
+
+      .btn-primary {
+        width: 100%;
+      }
+
+      .content {
+        padding: 16px;
+      }
+
+      .topbar {
+        padding: 0 14px;
+      }
+    }
+
+    :focus-visible {
+      outline: 2.5px solid var(--amber-500);
+      outline-offset: 2px;
+    }
+
+    /* ---------- Phiếu mượn ---------- */
+    .loan-layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      padding: 18px 24px 28px;
+    }
+
+    .loan-main {
+      flex: 1 1 60%;
+      min-width: 0;
+    }
+
+    .loan-reader-select {
+      margin-bottom: 16px;
+    }
+
+    .loan-reader-select label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--muted-700);
+      margin-bottom: 6px;
+    }
+
+    .loan-reader-select select {
+      width: 100%;
+      max-width: 360px;
+      padding: 10px 12px;
+      border: 1px solid var(--line-200);
+      border-radius: 10px;
+      font: inherit;
+      font-size: 13.5px;
+      background: #fff;
+      color: var(--ink-900);
+    }
+
+    .loan-reader-select select:focus {
+      outline: none;
+      border-color: var(--amber-500);
+    }
+
+    .loan-reader-hint {
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: var(--muted-500);
+    }
+
+    .loan-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line-200);
+      border-radius: 12px;
+    }
+
+    .loan-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    .loan-table thead th {
+      text-align: left;
+      color: var(--muted-500);
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line-200);
+      background: var(--paper-50);
+    }
+
+    .loan-table tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line-200);
+      vertical-align: middle;
+      color: var(--ink-900);
+    }
+
+    .loan-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .loan-table__author {
+      color: var(--muted-700);
+    }
+
+    .loan-table__qty {
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .loan-table__qty--out {
+      color: var(--stamp-borrowed);
+      font-weight: 600;
+    }
+
+    .btn-borrow {
+      background: var(--navy-950);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-borrow:hover:not(:disabled) {
+      background: var(--navy-800);
+    }
+
+    .btn-borrow:disabled {
+      background: var(--line-200);
+      color: var(--muted-500);
+      cursor: not-allowed;
+    }
+
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--line-200);
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted-700);
+      cursor: pointer;
+    }
+
+    .btn-ghost:hover {
+      background: var(--paper-50);
+    }
+
+    .loan-history {
+      flex: 0 0 340px;
+      background: var(--paper-50);
+      border: 1px solid var(--line-200);
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 620px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .loan-history__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .loan-history__head h2 {
+      font-size: 15.5px;
+    }
+
+    .loan-history__list {
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 2px;
+    }
+
+    .loan-history__item {
+      background: #fff;
+      border: 1px solid var(--line-200);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .loan-history__item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .loan-history__title {
+      font-weight: 600;
+      font-size: 13.5px;
+      color: var(--ink-900);
+      line-height: 1.3;
+    }
+
+    .loan-history__meta {
+      color: var(--muted-500);
+      font-size: 11.5px;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .loan-status {
+      font-size: 10.5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .loan-status--dang {
+      background: rgba(217, 164, 65, .18);
+      color: var(--amber-600);
+    }
+
+    .loan-status--tra {
+      background: rgba(63, 122, 93, .18);
+      color: var(--stamp-available);
+    }
+
+    .loan-status--huy {
+      background: rgba(196, 72, 72, .16);
+      color: var(--stamp-borrowed);
+    }
+
+    .loan-history__cancel-wrap {
+      margin-top: 10px;
+      text-align: right;
+    }
+
+    .btn-cancel-loan {
+      background: none;
+      border: 1px solid var(--stamp-borrowed);
+      color: var(--stamp-borrowed);
+      border-radius: 8px;
+      padding: 5px 11px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-cancel-loan:hover {
+      background: rgba(196, 72, 72, .08);
+    }
+
+    .btn-danger {
+      background: var(--stamp-borrowed);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      filter: brightness(.92);
+    }
+
+    .btn-danger:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+    }
+
+    .loan-confirm__error {
+      color: var(--stamp-borrowed);
+      font-size: 12.5px;
+      margin: 10px 0 0;
+    }
+
+    .loan-confirm__actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .loan-success-modal {
+      text-align: center;
+    }
+
+    .loan-success__icon {
+      font-size: 38px;
+      margin-bottom: 8px;
+    }
+
+    .loan-success__desc {
+      color: var(--muted-700);
+      font-size: 13.5px;
+      margin: 4px 0 18px;
+    }
+
+    .loan-success__ok {
+      width: 100%;
+    }
+
+    @media (max-width: 900px) {
+      .loan-layout {
+        flex-direction: column;
+      }
+
+      .loan-history {
+        flex: 1 1 auto;
+        width: 100%;
+        max-height: 360px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- ================= LOGIN GATE ================= -->
-<section class="auth-page" id="loginView">
-  <div class="auth-page__visual">
-    <a href="#" class="auth-brand">
-      <span class="auth-brand__mark">TV</span>
-      <span>
-        <strong>Thư viện số</strong>
-        <small>Library Portal</small>
-      </span>
-    </a>
-
-    <div class="auth-intro">
-      <span class="auth-badge">Nội bộ thủ thư</span>
-      <h1>Quản lý kho sách, phiếu mượn và độc giả</h1>
-      <p>Đăng nhập bằng tài khoản được thư viện cấp để truy cập hệ thống quản lý.</p>
-    </div>
-
-    <p class="auth-copyright">© 2026 Thư viện số</p>
-  </div>
-
-  <div class="auth-page__form">
-    <form class="login-card" id="loginForm" novalidate>
-      <p class="eyebrow">Chào mừng trở lại</p>
-      <h2>Đăng nhập</h2>
-      <p class="login-card__desc">Sử dụng tên đăng nhập và mật khẩu được cấp.</p>
-
-      <label class="auth-field">
-        <span>Tên đăng nhập</span>
-        <input type="text" id="loginUsername" autocomplete="username" required />
-      </label>
-
-      <label class="auth-field">
-        <span>Mật khẩu</span>
-        <span class="auth-field__control">
-          <input type="password" id="loginPassword" autocomplete="current-password" required />
-          <button type="button" class="password-toggle" aria-label="Hiện mật khẩu">👁</button>
+  <!-- ================= LOGIN GATE ================= -->
+  <section class="auth-page" id="loginView">
+    <div class="auth-page__visual">
+      <a href="#" class="auth-brand">
+        <span class="auth-brand__mark" style="background: transparent; padding: 0;">
+          <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/10/Icon-CTy-Tap-doan-Phuong-Hoan.png"
+            alt="Phenikaa Logo" style="width: 100%; height: 100%; object-fit: contain;" />
         </span>
-      </label>
-
-      <div class="login-options">
-        <label><input type="checkbox" id="rememberMe" checked /> Ghi nhớ đăng nhập</label>
-        <a href="#" style="color:var(--muted-700);text-decoration:none;">Quên mật khẩu?</a>
-      </div>
-
-      <button type="submit" class="auth-submit" id="loginButton">Đăng nhập</button>
-      <p class="login-message" id="loginMessage" role="alert" aria-live="polite"></p>
-    </form>
-  </div>
-</section>
-
-<!-- ================= DASHBOARD (sau khi đăng nhập) ================= -->
-<div class="shell is-hidden" id="protectedApp">
-
-  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar__head">
-      <div class="brand">
-        <div class="brand__mark">TV</div>
-        <div class="brand__text">
-          <strong>Thư viện số</strong>
+        <span>
+          <strong>Thư viện số Phenikaa University</strong>
           <small>Library Portal</small>
-        </div>
+        </span>
+      </a>
+
+      <div class="auth-intro">
+        <span class="auth-badge">Nội bộ thủ thư</span>
+        <h1>Quản lý kho sách, phiếu mượn và độc giả</h1>
+        <p>Đăng nhập bằng tài khoản được thư viện cấp để truy cập hệ thống quản lý.</p>
       </div>
-      <button class="sidebar-close" onclick="closeSidebar()" aria-label="Đóng menu">
-        <svg class="icon" viewBox="0 0 24 24" width="20" height="20"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
+
+      <p class="auth-copyright">© 2026 Thư viện số</p>
     </div>
 
-    <p class="nav-label">Chức năng</p>
+    <div class="auth-page__form">
+      <form class="login-card" id="loginForm" novalidate>
+        <p class="eyebrow">Chào mừng trở lại</p>
+        <h2>Đăng nhập</h2>
+        <p class="login-card__desc">Sử dụng tên đăng nhập và mật khẩu được cấp.</p>
 
-    <a href="#" class="nav-item active" data-view="kho-sach">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      Kho sách
-    </a>
-    <a href="#" class="nav-item" data-view="phieu-muon">
-      <svg class="icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/><path d="M9 12h6M9 16h6"/></svg>
-      Phiếu mượn
-    </a>
-    <a href="#" class="nav-item" data-view="doc-gia">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Độc giả
-    </a>
+        <label class="auth-field">
+          <span>Tên đăng nhập</span>
+          <input type="text" id="loginUsername" autocomplete="username" required />
+        </label>
 
-    <div class="sidebar__footer">
-      <p>Thư viện số &middot; Phenikaa<br/></p>
+        <label class="auth-field">
+          <span>Mật khẩu</span>
+          <span class="auth-field__control">
+            <input type="password" id="loginPassword" autocomplete="current-password" required />
+            <button type="button" class="password-toggle" aria-label="Hiện mật khẩu">👁</button>
+          </span>
+        </label>
+
+        <div class="login-options">
+          <label><input type="checkbox" id="rememberMe" checked /> Ghi nhớ đăng nhập</label>
+          <a href="#" style="color:var(--muted-700);text-decoration:none;">Quên mật khẩu?</a>
+        </div>
+
+        <button type="submit" class="auth-submit" id="loginButton">Đăng nhập</button>
+        <p class="login-message" id="loginMessage" role="alert" aria-live="polite"></p>
+      </form>
     </div>
-  </aside>
+  </section>
 
-  <!-- MAIN -->
-  <div class="main">
-    <header class="topbar">
-      <button class="menu-toggle" aria-label="Mở menu">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-      </button>
+  <!-- ================= DASHBOARD (sau khi đăng nhập) ================= -->
+  <div class="shell is-hidden" id="protectedApp">
 
-      <div class="search-global">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" placeholder="Tìm kiếm chức năng..." />
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__head">
+        <div class="brand">
+          <div class="brand__mark" style="background: transparent; padding: 0; width: 40px; height: 40px;">
+            <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/10/Icon-CTy-Tap-doan-Phuong-Hoan.png"
+              alt="Phenikaa Logo" style="width: 100%; height: 100%; object-fit: contain;" />
+          </div>
+          <div class="brand__text">
+            <strong>Thư viện số Phenikaa University</strong>
+            <small>Library Portal</small>
+          </div>
+        </div>
+        <button class="sidebar-close" onclick="closeSidebar()" aria-label="Đóng menu">
+          <svg class="icon" viewBox="0 0 24 24" width="20" height="20">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      <div class="topbar__spacer"></div>
+      <p class="nav-label">Chức năng</p>
 
+      <a href="#" class="nav-item active" data-view="kho-sach">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+        Kho sách
+      </a>
+      <a href="#" class="nav-item" data-view="phieu-muon">
+        <svg class="icon" viewBox="0 0 24 24">
+          <rect x="8" y="2" width="8" height="4" rx="1" />
+          <path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3" />
+          <path d="M9 12h6M9 16h6" />
+        </svg>
+        Phiếu mượn
+      </a>
+      <a href="#" class="nav-item" data-view="doc-gia">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        Độc giả
+      </a>
 
-      <div class="user-chip">
-        <div class="user-avatar" id="userInitials">TV</div>
-        <div class="user-chip__text">
-          <strong id="userName">Độc giả</strong>
-          <small id="userRole">Thủ thư</small>
-        </div>
-        <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="m6 9 6 6 6-6"/></svg>
+      <div class="sidebar__footer">
+        <p>Thư viện số &middot; Phenikaa<br /></p>
       </div>
+    </aside>
 
-      <button class="icon-btn" id="logoutButton" aria-label="Đăng xuất" title="Đăng xuất">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-      </button>
-    </header>
+    <!-- MAIN -->
+    <div class="main">
+      <header class="topbar">
+        <button class="menu-toggle" aria-label="Mở menu">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M3 6h18M3 12h18M3 18h18" />
+          </svg>
+        </button>
 
-    <div class="content">
-      <section class="panel" id="panelKhoSach">
+        <div class="search-global">
+          <svg class="icon" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input type="text" placeholder="Tìm kiếm chức năng..." />
+        </div>
 
-        <div class="panel__head">
-          <h1>Kho sách</h1>
-          <div style="display: flex; gap: 10px;">
-            <button class="btn-primary" id="addBookBtn">Thêm sách mới</button>
-            <button class="icon-btn" aria-label="Trợ giúp">
-              <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>
-            </button>
+        <div class="topbar__spacer"></div>
+
+
+        <div class="user-chip">
+          <div class="user-avatar" id="userInitials">TV</div>
+          <div class="user-chip__text">
+            <strong id="userName">Độc giả</strong>
+            <small id="userRole">Thủ thư</small>
           </div>
+          <svg class="icon" viewBox="0 0 24 24" width="14" height="14">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
         </div>
 
-        <div class="filter-row">
-          <div class="field grow">
-            <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="text" id="searchInput" placeholder="Tìm theo tên sách, tác giả..." />
+        <button class="icon-btn" id="logoutButton" aria-label="Đăng xuất" title="Đăng xuất">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="M16 17l5-5-5-5" />
+            <path d="M21 12H9" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="content">
+        <section class="panel" id="panelKhoSach">
+
+          <div class="panel__head">
+            <h1>Kho sách</h1>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn-primary" id="addBookBtn">Thêm sách mới</button>
+              <button class="icon-btn" aria-label="Trợ giúp">
+                <svg class="icon" viewBox="0 0 24 24" width="15" height="15">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4" />
+                  <path d="M12 17h.01" />
+                </svg>
+              </button>
+            </div>
           </div>
-          <div class="field field--year">
-            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-            <span>Từ năm</span>
-            <input type="number" id="yearFrom" placeholder="1990" />
+
+          <div class="filter-row">
+            <div class="field grow">
+              <svg class="icon" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input type="text" id="searchInput" placeholder="Tìm theo tên sách, tác giả..." />
+            </div>
+            <div class="field field--year">
+              <svg class="icon" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
+              <span>Từ năm</span>
+              <input type="number" id="yearFrom" placeholder="1990" />
+            </div>
+            <div class="field field--year">
+              <svg class="icon" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
+              <span>Đến năm</span>
+              <input type="number" id="yearTo" placeholder="2026" />
+            </div>
+            <button class="btn-primary" type="button" id="searchButton">Tìm kiếm</button>
           </div>
-          <div class="field field--year">
-            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-            <span>Đến năm</span>
-            <input type="number" id="yearTo" placeholder="2026" />
+
+          <div class="tabs" id="tabs">
+            <div class="tab active" data-filter="all">Toàn bộ <span class="count" id="countAll">(0)</span></div>
+            <div class="tab" data-filter="available">Còn hàng <span class="count" id="countAvailable">(0)</span></div>
+            <div class="tab" data-filter="borrowed">Hết hàng <span class="count" id="countBorrowed">(0)</span></div>
           </div>
-          <button class="btn-primary" type="button" id="searchButton">Tìm kiếm</button>
-        </div>
 
-        <div class="tabs" id="tabs">
-          <div class="tab active" data-filter="all">Toàn bộ <span class="count" id="countAll">(0)</span></div>
-          <div class="tab" data-filter="available">Còn hàng <span class="count" id="countAvailable">(0)</span></div>
-          <div class="tab" data-filter="borrowed">Hết hàng <span class="count" id="countBorrowed">(0)</span></div>
-        </div>
+          <div class="grid" id="grid">
+            <p class="empty-state" id="gridEmpty">Đang tải danh sách sách...</p>
+          </div>
 
-        <div class="grid" id="grid">
-          <p class="empty-state" id="gridEmpty">Đang tải danh sách sách...</p>
-        </div>
-
-        </div>
+      </div>
       </section>
 
       <!-- ================= PHIẾU MƯỢN ================= -->
@@ -553,12 +1492,16 @@
               <select id="loanDocGiaSelect">
                 <option value="">-- Chọn độc giả --</option>
               </select>
-              <p class="loan-reader-hint" id="loanReaderHint">Chọn độc giả trước, sau đó bấm "Mượn" ở sách muốn cho mượn.</p>
+              <p class="loan-reader-hint" id="loanReaderHint">Chọn độc giả trước, sau đó bấm "Mượn" ở sách muốn cho
+                mượn.</p>
             </div>
 
             <div class="filter-row" style="padding:0 0 14px;">
               <div class="field grow">
-                <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                <svg class="icon" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
                 <input type="text" id="loanSearchInput" placeholder="Tìm sách theo tên, tác giả..." />
               </div>
             </div>
@@ -574,7 +1517,9 @@
                   </tr>
                 </thead>
                 <tbody id="loanBookTableBody">
-                  <tr><td colspan="4" class="empty-state">Đang tải danh sách sách...</td></tr>
+                  <tr>
+                    <td colspan="4" class="empty-state">Đang tải danh sách sách...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -603,332 +1548,332 @@
 
     </div>
   </div>
-</div>
+  </div>
 
-<div class="auth-toast" id="authToast" role="status" aria-live="polite"></div>
+  <div class="auth-toast" id="authToast" role="status" aria-live="polite"></div>
 
-<script>
-"use strict";
+  <script>
+    "use strict";
 
-/**
- * Thư viện số — app.js
- * Gộp 2 phần:
- * 1) Đăng nhập thật, gọi backend NestJS (/auth/login) — access token giữ trong bộ nhớ, không lưu localStorage.
- * 2) Giao diện dashboard "Kho sách": mở/đóng sidebar, lọc sách theo trạng thái, đăng xuất.
- *
- * Backend hiện chưa có /auth/refresh và /auth/logout nên:
- * - Tải lại trang sẽ cần đăng nhập lại.
- * - Đăng xuất được xử lý ở phía frontend.
- *
- * LƯU Ý: danh sách sách trong .book-card hiện vẫn là dữ liệu mockup tĩnh trong index.html,
- * chưa gọi GET /sach. Muốn nối dữ liệu thật, thay phần render card bằng fetchJson('/sach').
- */
+    /**
+     * Thư viện số — app.js
+     * Gộp 2 phần:
+     * 1) Đăng nhập thật, gọi backend NestJS (/auth/login) — access token giữ trong bộ nhớ, không lưu localStorage.
+     * 2) Giao diện dashboard "Kho sách": mở/đóng sidebar, lọc sách theo trạng thái, đăng xuất.
+     *
+     * Backend hiện chưa có /auth/refresh và /auth/logout nên:
+     * - Tải lại trang sẽ cần đăng nhập lại.
+     * - Đăng xuất được xử lý ở phía frontend.
+     *
+     * LƯU Ý: danh sách sách trong .book-card hiện vẫn là dữ liệu mockup tĩnh trong index.html,
+     * chưa gọi GET /sach. Muốn nối dữ liệu thật, thay phần render card bằng fetchJson('/sach').
+     */
 
-function buildApiBase() {
-  const { protocol, hostname } = window.location;
-  if (hostname.endsWith(".app.github.dev")) {
-    // Codespaces: frontend va backend chay chung port 3000, cung origin
-    return `${protocol}//${hostname}`;
-  }
-  return `${protocol}//${hostname}:3000`;
-}
-
-const API_BASE =
-  (typeof window !== "undefined" && window.location
-    ? buildApiBase()
-    : "http://127.0.0.1:3000");
-
-let accessToken = null;
-let toastTimer = null;
-
-const el = {};
-
-document.addEventListener("DOMContentLoaded", () => {
-  el.loginView = document.getElementById("loginView");
-  el.protectedApp = document.getElementById("protectedApp");
-  el.loginForm = document.getElementById("loginForm");
-  el.username = document.getElementById("loginUsername");
-  el.password = document.getElementById("loginPassword");
-  el.rememberMe = document.getElementById("rememberMe");
-  el.loginButton = document.getElementById("loginButton");
-  el.loginMessage = document.getElementById("loginMessage");
-  el.togglePassword = document.querySelector(".password-toggle");
-  el.logoutButton = document.getElementById("logoutButton");
-  el.userName = document.getElementById("userName");
-  el.userRole = document.getElementById("userRole");
-  el.userInitials = document.getElementById("userInitials");
-  el.toast = document.getElementById("authToast");
-
-  el.sidebar = document.getElementById("sidebar");
-  el.sidebarBackdrop = document.getElementById("sidebarBackdrop");
-  el.menuToggle = document.querySelector(".menu-toggle");
-
-  bindAuthEvents();
-  bindDashboardEvents();
-  bindBookModalEvents();
-  bindNavEvents();
-  bindLoanEvents();
-  restoreRememberedUsername();
-});
-
-/* ========================================================================
-   ĐĂNG NHẬP / ĐĂNG XUẤT
-   ======================================================================== */
-
-function bindAuthEvents() {
-  el.loginForm?.addEventListener("submit", handleLogin);
-
-  el.password?.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      handleLogin(event);
+    function buildApiBase() {
+      const { protocol, hostname } = window.location;
+      if (hostname.endsWith(".app.github.dev")) {
+        // Codespaces: frontend va backend chay chung port 3000, cung origin
+        return `${protocol}//${hostname}`;
+      }
+      return `${protocol}//${hostname}:3000`;
     }
-  });
 
-  el.togglePassword?.addEventListener("click", togglePasswordVisibility);
-  el.logoutButton?.addEventListener("click", handleLogout);
-}
+    const API_BASE =
+      (typeof window !== "undefined" && window.location
+        ? buildApiBase()
+        : "http://127.0.0.1:3000");
 
-async function handleLogin(event) {
-  event.preventDefault();
-  clearLoginMessage();
+    let accessToken = null;
+    let toastTimer = null;
 
-  if (!el.loginForm.reportValidity()) return;
+    const el = {};
 
-  const username = el.username.value.trim();
-  const password = el.password.value;
-  const rememberMe = el.rememberMe.checked;
+    document.addEventListener("DOMContentLoaded", () => {
+      el.loginView = document.getElementById("loginView");
+      el.protectedApp = document.getElementById("protectedApp");
+      el.loginForm = document.getElementById("loginForm");
+      el.username = document.getElementById("loginUsername");
+      el.password = document.getElementById("loginPassword");
+      el.rememberMe = document.getElementById("rememberMe");
+      el.loginButton = document.getElementById("loginButton");
+      el.loginMessage = document.getElementById("loginMessage");
+      el.togglePassword = document.querySelector(".password-toggle");
+      el.logoutButton = document.getElementById("logoutButton");
+      el.userName = document.getElementById("userName");
+      el.userRole = document.getElementById("userRole");
+      el.userInitials = document.getElementById("userInitials");
+      el.toast = document.getElementById("authToast");
 
-  setLoginLoading(true);
+      el.sidebar = document.getElementById("sidebar");
+      el.sidebarBackdrop = document.getElementById("sidebarBackdrop");
+      el.menuToggle = document.querySelector(".menu-toggle");
 
-  try {
-    const response = await fetchJson("/auth/login", {
-      method: "POST",
-      skipAuthorization: true,
-      body: { username, password },
+      bindAuthEvents();
+      bindDashboardEvents();
+      bindBookModalEvents();
+      bindNavEvents();
+      bindLoanEvents();
+      restoreRememberedUsername();
     });
 
-    if (!response?.access_token) {
-      throw new ApiError(500, "Backend không trả về access_token.");
+    /* ========================================================================
+       ĐĂNG NHẬP / ĐĂNG XUẤT
+       ======================================================================== */
+
+    function bindAuthEvents() {
+      el.loginForm?.addEventListener("submit", handleLogin);
+
+      el.password?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          handleLogin(event);
+        }
+      });
+
+      el.togglePassword?.addEventListener("click", togglePasswordVisibility);
+      el.logoutButton?.addEventListener("click", handleLogout);
     }
 
-    accessToken = response.access_token;
-    saveRememberedUsername(username, rememberMe);
-    el.password.value = "";
+    async function handleLogin(event) {
+      event.preventDefault();
+      clearLoginMessage();
 
-    showProtectedApp({ username });
-    showToast("Đăng nhập thành công.");
-  } catch (error) {
-    console.error("Lỗi đăng nhập:", error);
-    accessToken = null;
-    setLoginMessage(toFriendlyMessage(error));
-  } finally {
-    setLoginLoading(false);
-  }
-}
+      if (!el.loginForm.reportValidity()) return;
 
-function handleLogout() {
-  accessToken = null;
-  el.password.value = "";
-  closeSidebar();
-  showLoginScreen("Bạn đã đăng xuất.");
-}
+      const username = el.username.value.trim();
+      const password = el.password.value;
+      const rememberMe = el.rememberMe.checked;
 
-function showProtectedApp(user) {
-  const displayName = user?.username || "Độc giả";
+      setLoginLoading(true);
 
-  el.userName.textContent = displayName;
-  el.userRole.textContent = "Thủ thư";
-  el.userInitials.textContent = createInitials(displayName);
+      try {
+        const response = await fetchJson("/auth/login", {
+          method: "POST",
+          skipAuthorization: true,
+          body: { username, password },
+        });
 
-  el.loginView.classList.add("is-hidden");
-  el.protectedApp.classList.remove("is-hidden");
-  document.title = "Kho sách | Thư viện số";
+        if (!response?.access_token) {
+          throw new ApiError(500, "Backend không trả về access_token.");
+        }
 
-  loadSachList();
-}
+        accessToken = response.access_token;
+        saveRememberedUsername(username, rememberMe);
+        el.password.value = "";
 
-function showLoginScreen(message = "") {
-  el.protectedApp.classList.add("is-hidden");
-  el.loginView.classList.remove("is-hidden");
-  document.title = "Đăng nhập | Thư viện số";
-
-  message ? setLoginMessage(message) : clearLoginMessage();
-  window.setTimeout(() => el.username?.focus(), 50);
-}
-
-function createInitials(name) {
-  const initials = String(name)
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(-2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-  return initials || "TV";
-}
-
-function togglePasswordVisibility() {
-  const showing = el.password.type === "text";
-  el.password.type = showing ? "password" : "text";
-  el.togglePassword.textContent = showing ? "👁" : "🙈";
-  el.togglePassword.setAttribute("aria-label", showing ? "Hiện mật khẩu" : "Ẩn mật khẩu");
-}
-
-function saveRememberedUsername(username, rememberMe) {
-  try {
-    if (rememberMe) {
-      localStorage.setItem("library:last-username", username);
-    } else {
-      localStorage.removeItem("library:last-username");
+        showProtectedApp({ username });
+        showToast("Đăng nhập thành công.");
+      } catch (error) {
+        console.error("Lỗi đăng nhập:", error);
+        accessToken = null;
+        setLoginMessage(toFriendlyMessage(error));
+      } finally {
+        setLoginLoading(false);
+      }
     }
-  } catch {
-    // Đăng nhập vẫn hoạt động nếu trình duyệt chặn localStorage.
-  }
-}
 
-function restoreRememberedUsername() {
-  try {
-    const saved = localStorage.getItem("library:last-username");
-    if (saved && el.username) {
-      el.username.value = saved;
-      el.rememberMe.checked = true;
+    function handleLogout() {
+      accessToken = null;
+      el.password.value = "";
+      closeSidebar();
+      showLoginScreen("Bạn đã đăng xuất.");
     }
-  } catch {
-    // bỏ qua nếu localStorage bị chặn
-  }
-}
 
-function setLoginLoading(loading) {
-  el.loginButton.disabled = loading;
-  el.loginButton.textContent = loading ? "Đang đăng nhập..." : "Đăng nhập";
-  el.username.disabled = loading;
-  el.password.disabled = loading;
-  el.rememberMe.disabled = loading;
-}
+    function showProtectedApp(user) {
+      const displayName = user?.username || "Độc giả";
 
-function setLoginMessage(message) {
-  el.loginMessage.textContent = message;
-}
-function clearLoginMessage() {
-  setLoginMessage("");
-}
+      el.userName.textContent = displayName;
+      el.userRole.textContent = "Thủ thư";
+      el.userInitials.textContent = createInitials(displayName);
 
-function showToast(message) {
-  if (!el.toast) return;
-  el.toast.textContent = message;
-  el.toast.classList.add("is-visible");
-  window.clearTimeout(toastTimer);
-  toastTimer = window.setTimeout(() => el.toast.classList.remove("is-visible"), 2800);
-}
+      el.loginView.classList.add("is-hidden");
+      el.protectedApp.classList.remove("is-hidden");
+      document.title = "Kho sách | Thư viện số";
 
-/* ========================================================================
-   GỌI API BACKEND
-   ======================================================================== */
-
-async function fetchJson(path, options = {}) {
-  const { method = "GET", body, headers = {}, skipAuthorization = false } = options;
-
-  const requestHeaders = { Accept: "application/json", ...headers };
-  if (body !== undefined) requestHeaders["Content-Type"] = "application/json";
-  if (!skipAuthorization && accessToken) requestHeaders.Authorization = `Bearer ${accessToken}`;
-
-  const response = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers: requestHeaders,
-    cache: "no-store",
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-
-  const data = await parseResponseBody(response);
-
-  if (!response.ok) {
-    const message = data?.message || data?.error || `Yêu cầu thất bại với mã ${response.status}.`;
-    throw new ApiError(response.status, normalizeMessage(message));
-  }
-
-  return data;
-}
-
-async function parseResponseBody(response) {
-  if (response.status === 204) return null;
-  const contentType = response.headers.get("content-type") || "";
-  if (!contentType.includes("application/json")) return null;
-  return response.json();
-}
-
-function normalizeMessage(message) {
-  return Array.isArray(message) ? message.join(". ") : String(message);
-}
-
-function toFriendlyMessage(error) {
-  if (error instanceof TypeError) {
-    return "Không thể kết nối tới máy chủ. Hãy chắc chắn backend đang chạy ở cổng 3000.";
-  }
-  if (error instanceof ApiError) {
-    if (error.status === 401) return "Tên đăng nhập hoặc mật khẩu không đúng.";
-    if (error.status === 429) return "Bạn thử đăng nhập quá nhiều lần. Vui lòng chờ một phút.";
-    return error.message;
-  }
-  return "Đã xảy ra lỗi. Vui lòng thử lại.";
-}
-
-class ApiError extends Error {
-  constructor(status, message) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-  }
-}
-
-async function loadSachList() {
-  const grid = document.getElementById("grid");
-  try {
-    const sachList = await fetchJson("/sach");
-    renderBookGrid(sachList);
-  } catch (error) {
-    console.error("Loi tai danh sach sach:", error);
-    if (grid) {
-      grid.innerHTML = `<p class="empty-state">${escapeHtml(toFriendlyMessage(error))}</p>`;
+      loadSachList();
     }
-    showToast(toFriendlyMessage(error));
-  }
-}
 
-function renderBookGrid(sachList) {
-  const grid = document.getElementById("grid");
-  if (!grid) return;
-  currentSachList = sachList;
-  grid.innerHTML = "";
+    function showLoginScreen(message = "") {
+      el.protectedApp.classList.add("is-hidden");
+      el.loginView.classList.remove("is-hidden");
+      document.title = "Đăng nhập | Thư viện số";
 
-  let countAvailable = 0;
-  let countOut = 0;
+      message ? setLoginMessage(message) : clearLoginMessage();
+      window.setTimeout(() => el.username?.focus(), 50);
+    }
 
-  sachList.forEach((sach) => {
-    const soLuong = Number(sach.so_luong) || 0;
-    const status = soLuong > 0 ? "available" : "borrowed";
-    if (status === "available") countAvailable += 1;
-    else countOut += 1;
+    function createInitials(name) {
+      const initials = String(name)
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(-2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("");
+      return initials || "TV";
+    }
 
-    const stampLabel = status === "available" ? "Con hang" : "Het hang";
-    const stampClass = status === "available" ? "stamp--available" : "stamp--borrowed";
-    const cover = status === "available" ? "\ud83d\udcd7" : "\ud83d\udcd5";
-    const spine = status === "available" ? "#3F7A5D" : "#A6432B";
+    function togglePasswordVisibility() {
+      const showing = el.password.type === "text";
+      el.password.type = showing ? "password" : "text";
+      el.togglePassword.textContent = showing ? "👁" : "🙈";
+      el.togglePassword.setAttribute("aria-label", showing ? "Hiện mật khẩu" : "Ẩn mật khẩu");
+    }
 
-    const coverHtml = sach.hinh_anh 
-      ? `<img src="${escapeHtml(sach.hinh_anh)}" alt="Cover" style="width:100%; height:100%; object-fit:cover; border-radius:9px;" onerror="this.onerror=null; this.src='https://placehold.co/300x450/0f172a/ffffff?text=No+Image';" />` 
-      : cover;
+    function saveRememberedUsername(username, rememberMe) {
+      try {
+        if (rememberMe) {
+          localStorage.setItem("library:last-username", username);
+        } else {
+          localStorage.removeItem("library:last-username");
+        }
+      } catch {
+        // Đăng nhập vẫn hoạt động nếu trình duyệt chặn localStorage.
+      }
+    }
 
-    const card = document.createElement("article");
-    card.className = "book-card";
-    card.style.setProperty("--spine", spine);
-    card.dataset.status = status;
-    card.dataset.sachId = sach.id;
-    card.dataset.tenSach = (sach.ten_sach || "").toLowerCase();
-    card.dataset.tacGia = (sach.tac_gia || "").toLowerCase();
-    card.dataset.namXuatBan = sach.nam_xuat_ban;
+    function restoreRememberedUsername() {
+      try {
+        const saved = localStorage.getItem("library:last-username");
+        if (saved && el.username) {
+          el.username.value = saved;
+          el.rememberMe.checked = true;
+        }
+      } catch {
+        // bỏ qua nếu localStorage bị chặn
+      }
+    }
 
-    card.innerHTML = `
+    function setLoginLoading(loading) {
+      el.loginButton.disabled = loading;
+      el.loginButton.textContent = loading ? "Đang đăng nhập..." : "Đăng nhập";
+      el.username.disabled = loading;
+      el.password.disabled = loading;
+      el.rememberMe.disabled = loading;
+    }
+
+    function setLoginMessage(message) {
+      el.loginMessage.textContent = message;
+    }
+    function clearLoginMessage() {
+      setLoginMessage("");
+    }
+
+    function showToast(message) {
+      if (!el.toast) return;
+      el.toast.textContent = message;
+      el.toast.classList.add("is-visible");
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => el.toast.classList.remove("is-visible"), 2800);
+    }
+
+    /* ========================================================================
+       GỌI API BACKEND
+       ======================================================================== */
+
+    async function fetchJson(path, options = {}) {
+      const { method = "GET", body, headers = {}, skipAuthorization = false } = options;
+
+      const requestHeaders = { Accept: "application/json", ...headers };
+      if (body !== undefined) requestHeaders["Content-Type"] = "application/json";
+      if (!skipAuthorization && accessToken) requestHeaders.Authorization = `Bearer ${accessToken}`;
+
+      const response = await fetch(`${API_BASE}${path}`, {
+        method,
+        headers: requestHeaders,
+        cache: "no-store",
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+
+      const data = await parseResponseBody(response);
+
+      if (!response.ok) {
+        const message = data?.message || data?.error || `Yêu cầu thất bại với mã ${response.status}.`;
+        throw new ApiError(response.status, normalizeMessage(message));
+      }
+
+      return data;
+    }
+
+    async function parseResponseBody(response) {
+      if (response.status === 204) return null;
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) return null;
+      return response.json();
+    }
+
+    function normalizeMessage(message) {
+      return Array.isArray(message) ? message.join(". ") : String(message);
+    }
+
+    function toFriendlyMessage(error) {
+      if (error instanceof TypeError) {
+        return "Không thể kết nối tới máy chủ. Hãy chắc chắn backend đang chạy ở cổng 3000.";
+      }
+      if (error instanceof ApiError) {
+        if (error.status === 401) return "Tên đăng nhập hoặc mật khẩu không đúng.";
+        if (error.status === 429) return "Bạn thử đăng nhập quá nhiều lần. Vui lòng chờ một phút.";
+        return error.message;
+      }
+      return "Đã xảy ra lỗi. Vui lòng thử lại.";
+    }
+
+    class ApiError extends Error {
+      constructor(status, message) {
+        super(message);
+        this.name = "ApiError";
+        this.status = status;
+      }
+    }
+
+    async function loadSachList() {
+      const grid = document.getElementById("grid");
+      try {
+        const sachList = await fetchJson("/sach");
+        renderBookGrid(sachList);
+      } catch (error) {
+        console.error("Loi tai danh sach sach:", error);
+        if (grid) {
+          grid.innerHTML = `<p class="empty-state">${escapeHtml(toFriendlyMessage(error))}</p>`;
+        }
+        showToast(toFriendlyMessage(error));
+      }
+    }
+
+    function renderBookGrid(sachList) {
+      const grid = document.getElementById("grid");
+      if (!grid) return;
+      currentSachList = sachList;
+      grid.innerHTML = "";
+
+      let countAvailable = 0;
+      let countOut = 0;
+
+      sachList.forEach((sach) => {
+        const soLuong = Number(sach.so_luong) || 0;
+        const status = soLuong > 0 ? "available" : "borrowed";
+        if (status === "available") countAvailable += 1;
+        else countOut += 1;
+
+        const stampLabel = status === "available" ? "Con hang" : "Het hang";
+        const stampClass = status === "available" ? "stamp--available" : "stamp--borrowed";
+        const cover = status === "available" ? "\ud83d\udcd7" : "\ud83d\udcd5";
+        const spine = status === "available" ? "#3F7A5D" : "#A6432B";
+
+        const coverHtml = sach.hinh_anh
+          ? `<img src="${escapeHtml(sach.hinh_anh)}" alt="Cover" style="width:100%; height:100%; object-fit:cover; border-radius:9px;" onerror="this.onerror=null; this.src='https://placehold.co/300x450/0f172a/ffffff?text=No+Image';" />`
+          : cover;
+
+        const card = document.createElement("article");
+        card.className = "book-card";
+        card.style.setProperty("--spine", spine);
+        card.dataset.status = status;
+        card.dataset.sachId = sach.id;
+        card.dataset.tenSach = (sach.ten_sach || "").toLowerCase();
+        card.dataset.tacGia = (sach.tac_gia || "").toLowerCase();
+        card.dataset.namXuatBan = sach.nam_xuat_ban;
+
+        card.innerHTML = `
       <div class="book-card__top">
         <div class="book-card__cover">${coverHtml}</div>
         <span class="stamp ${stampClass}">${stampLabel}</span>
@@ -950,459 +1895,459 @@ function renderBookGrid(sachList) {
         </div>
       </div>
     `;
-    grid.appendChild(card);
-  });
+        grid.appendChild(card);
+      });
 
-  const countAllEl = document.getElementById("countAll");
-  const countAvailableEl = document.getElementById("countAvailable");
-  const countBorrowedEl = document.getElementById("countBorrowed");
-  if (countAllEl) countAllEl.textContent = `(${sachList.length})`;
-  if (countAvailableEl) countAvailableEl.textContent = `(${countAvailable})`;
-  if (countBorrowedEl) countBorrowedEl.textContent = `(${countOut})`;
+      const countAllEl = document.getElementById("countAll");
+      const countAvailableEl = document.getElementById("countAvailable");
+      const countBorrowedEl = document.getElementById("countBorrowed");
+      if (countAllEl) countAllEl.textContent = `(${sachList.length})`;
+      if (countAvailableEl) countAvailableEl.textContent = `(${countAvailable})`;
+      if (countBorrowedEl) countBorrowedEl.textContent = `(${countOut})`;
 
-  applyFilters();
-}
-
-function applyFilters() {
-  const activeTab = document.querySelector(".tab.active");
-  const statusFilter = activeTab?.dataset.filter || "all";
-
-  const searchValue = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
-  const yearFromRaw = document.getElementById("yearFrom")?.value;
-  const yearToRaw = document.getElementById("yearTo")?.value;
-  const yearFrom = yearFromRaw ? Number(yearFromRaw) : null;
-  const yearTo = yearToRaw ? Number(yearToRaw) : null;
-
-  document.querySelectorAll(".book-card").forEach((card) => {
-    const statusMatch = statusFilter === "all" || card.dataset.status === statusFilter;
-
-    const textMatch =
-      !searchValue ||
-      (card.dataset.tenSach || "").includes(searchValue) ||
-      (card.dataset.tacGia || "").includes(searchValue);
-
-    const year = Number(card.dataset.namXuatBan);
-    const yearMatch =
-      (yearFrom === null || year >= yearFrom) &&
-      (yearTo === null || year <= yearTo);
-
-    const match = statusMatch && textMatch && yearMatch;
-    card.style.display = match ? "" : "none";
-  });
-}
-
-function escapeHtml(value) {
-  const div = document.createElement("div");
-  div.textContent = value ?? "";
-  return div.innerHTML;
-}
-
-let currentSachList = [];
-
-function bindBookModalEvents() {
-  const backdrop = document.getElementById("bookModalBackdrop");
-  const closeBtn = document.getElementById("bookModalClose");
-  const grid = document.getElementById("grid");
-
-  closeBtn?.addEventListener("click", closeBookModal);
-  backdrop?.addEventListener("click", (event) => {
-    if (event.target === backdrop) closeBookModal();
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeBookModal();
-      closeBookForm();
-      closeDeleteConfirm();
-    }
-  });
-
-  grid?.addEventListener("click", (event) => {
-    const link = event.target.closest(".book-card__link");
-    const editBtn = event.target.closest(".edit-book-btn");
-    const deleteBtn = event.target.closest(".delete-book-btn");
-
-    if (link) {
-      event.preventDefault();
-      const card = link.closest(".book-card");
-      const sachId = card?.dataset.sachId;
-      const sach = currentSachList.find((item) => String(item.id) === String(sachId));
-      if (sach) openBookModal(sach);
-    } else if (editBtn) {
-      event.preventDefault();
-      const sachId = editBtn.dataset.id;
-      const sach = currentSachList.find((item) => String(item.id) === String(sachId));
-      if (sach) openBookForm(sach);
-    } else if (deleteBtn) {
-      event.preventDefault();
-      const sachId = deleteBtn.dataset.id;
-      openDeleteConfirm(sachId);
-    }
-  });
-
-  // Book form events
-  document.getElementById("addBookBtn")?.addEventListener("click", () => openBookForm());
-  document.getElementById("bookFormClose")?.addEventListener("click", closeBookForm);
-  document.getElementById("bookFormCancelBtn")?.addEventListener("click", closeBookForm);
-  document.getElementById("bookFormBackdrop")?.addEventListener("click", (event) => {
-    if (event.target.id === "bookFormBackdrop") closeBookForm();
-  });
-  document.getElementById("bookForm")?.addEventListener("submit", submitBookForm);
-
-  // Image upload & Auto Fetch
-  document.getElementById("bookFormAutoFetchBtn")?.addEventListener("click", () => {
-    const title = document.getElementById("bookFormName")?.value.trim();
-    if (!title) {
-      showToast("Vui lòng nhập Tên sách trước khi tìm ảnh.");
-      return;
-    }
-    const keyword = encodeURIComponent(title);
-    window.open(`https://www.pinterest.com/search/pins/?q=${keyword}`, '_blank');
-    showToast("Đã mở Pinterest! Hãy copy địa chỉ hình ảnh (Copy image address) bạn thích và dán vào ô URL nhé.");
-  });
-
-  document.getElementById("bookFormUploadBtn")?.addEventListener("click", () => {
-    document.getElementById("bookFormFile")?.click();
-  });
-  document.getElementById("bookFormFile")?.addEventListener("change", handleImageUpload);
-  document.getElementById("bookFormImageStr")?.addEventListener("input", updateImagePreview);
-
-  // Delete confirm events
-  document.getElementById("deleteConfirmClose")?.addEventListener("click", closeDeleteConfirm);
-  document.getElementById("deleteConfirmCancel")?.addEventListener("click", closeDeleteConfirm);
-  document.getElementById("deleteConfirmBackdrop")?.addEventListener("click", (event) => {
-    if (event.target.id === "deleteConfirmBackdrop") closeDeleteConfirm();
-  });
-  document.getElementById("deleteConfirmSubmit")?.addEventListener("click", submitDeleteConfirm);
-}
-
-function openBookModal(sach) {
-  const soLuong = Number(sach.so_luong) || 0;
-  const status = soLuong > 0 ? "Con hang" : "Het hang";
-  const cover = soLuong > 0 ? "\ud83d\udcd7" : "\ud83d\udcd5";
-
-  const coverHtml = sach.hinh_anh 
-    ? `<img src="${escapeHtml(sach.hinh_anh)}" style="width:100px; height:140px; object-fit:cover; border-radius:9px;" onerror="this.onerror=null; this.src='https://placehold.co/300x450/0f172a/ffffff?text=No+Image';" />` 
-    : cover;
-
-  document.getElementById("bookModalCover").innerHTML = coverHtml;
-  document.getElementById("bookModalTitle").textContent = sach.ten_sach ?? "";
-  document.getElementById("bookModalAuthor").textContent = sach.tac_gia ?? "";
-  document.getElementById("bookModalGenre").textContent = sach.the_loai ?? "";
-  document.getElementById("bookModalYear").textContent = sach.nam_xuat_ban ?? "";
-  document.getElementById("bookModalQty").textContent = `${soLuong} quyen`;
-  document.getElementById("bookModalStatus").textContent = status;
-
-  document.getElementById("bookModalBackdrop").classList.add("show");
-}
-
-function closeBookModal() {
-  document.getElementById("bookModalBackdrop").classList.remove("show");
-}
-
-function openBookForm(sach = null) {
-  const form = document.getElementById("bookForm");
-  const title = document.getElementById("bookFormTitle");
-  const error = document.getElementById("bookFormError");
-  
-  form.reset();
-  error.classList.add("is-hidden");
-  error.textContent = "";
-
-  if (sach) {
-    title.textContent = "Sửa sách";
-    document.getElementById("bookFormId").value = sach.id;
-    document.getElementById("bookFormName").value = sach.ten_sach || "";
-    document.getElementById("bookFormAuthor").value = sach.tac_gia || "";
-    document.getElementById("bookFormGenre").value = sach.the_loai || "";
-    document.getElementById("bookFormYear").value = sach.nam_xuat_ban || "";
-    document.getElementById("bookFormQty").value = sach.so_luong || 0;
-    document.getElementById("bookFormImageStr").value = sach.hinh_anh || "";
-  } else {
-    title.textContent = "Thêm sách mới";
-    document.getElementById("bookFormId").value = "";
-    document.getElementById("bookFormQty").value = 1;
-  }
-  
-  // Render Preset Covers
-  const presetContainer = document.getElementById("presetCoversContainer");
-  if (presetContainer) {
-    const presets = [
-      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&h=600&fit=crop", // Book stack
-      "https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=400&h=600&fit=crop", // Open book
-      "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=400&h=600&fit=crop", // Library
-      "https://images.unsplash.com/photo-1456953180671-730de08edaa7?q=80&w=400&h=600&fit=crop", // Vintage book
-      "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=400&h=600&fit=crop", // Coffee and book
-      "https://images.unsplash.com/photo-1550399105-c4db5fb85c18?q=80&w=400&h=600&fit=crop"  // Minimal book
-    ];
-    presetContainer.innerHTML = presets.map(url => 
-      `<img src="${url}" class="preset-cover" style="width:36px; height:48px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--line-200);" onclick="document.getElementById('bookFormImageStr').value='${url}'; updateImagePreview();" />`
-    ).join("");
-  }
-
-  updateImagePreview();
-  document.getElementById("bookFormBackdrop").classList.add("show");
-}
-
-function closeBookForm() {
-  document.getElementById("bookFormBackdrop").classList.remove("show");
-}
-
-function updateImagePreview() {
-  const imageStr = document.getElementById("bookFormImageStr").value.trim();
-  const preview = document.getElementById("bookFormImagePreview");
-  if (imageStr) {
-    preview.innerHTML = `<img src="${escapeHtml(imageStr)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='https://placehold.co/300x450/0f172a/ffffff?text=No+Image';" />`;
-  } else {
-    preview.innerHTML = `<span>Trống</span>`;
-  }
-}
-
-function handleImageUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    document.getElementById("bookFormImageStr").value = e.target.result;
-    updateImagePreview();
-  };
-  reader.readAsDataURL(file);
-  event.target.value = "";
-}
-
-async function submitBookForm(event) {
-  event.preventDefault();
-  const btn = document.getElementById("bookFormSubmitBtn");
-  const errorEl = document.getElementById("bookFormError");
-  const id = document.getElementById("bookFormId").value;
-  
-  const payload = {
-    ten_sach: document.getElementById("bookFormName").value.trim(),
-    tac_gia: document.getElementById("bookFormAuthor").value.trim(),
-    the_loai: document.getElementById("bookFormGenre").value.trim(),
-    nam_xuat_ban: Number(document.getElementById("bookFormYear").value),
-    so_luong: Number(document.getElementById("bookFormQty").value),
-    hinh_anh: document.getElementById("bookFormImageStr").value.trim()
-  };
-
-  btn.disabled = true;
-  btn.textContent = "Đang lưu...";
-  errorEl.classList.add("is-hidden");
-
-  try {
-    if (id) {
-      await fetchJson(`/sach/${id}`, { method: "PUT", body: payload });
-      showToast("Cập nhật sách thành công!");
-    } else {
-      await fetchJson(`/sach`, { method: "POST", body: payload });
-      showToast("Thêm sách thành công!");
-    }
-    closeBookForm();
-    loadSachList();
-  } catch (error) {
-    console.error("Lỗi lưu sách:", error);
-    errorEl.textContent = toFriendlyMessage(error);
-    errorEl.classList.remove("is-hidden");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Lưu sách";
-  }
-}
-
-let pendingDeleteSachId = null;
-
-function openDeleteConfirm(id) {
-  const sach = currentSachList.find((item) => String(item.id) === String(id));
-  if (!sach) return;
-  pendingDeleteSachId = id;
-  document.getElementById("deleteConfirmSach").textContent = sach.ten_sach;
-  document.getElementById("deleteConfirmError").classList.add("is-hidden");
-  document.getElementById("deleteConfirmBackdrop").classList.add("show");
-}
-
-function closeDeleteConfirm() {
-  document.getElementById("deleteConfirmBackdrop").classList.remove("show");
-  pendingDeleteSachId = null;
-}
-
-async function submitDeleteConfirm() {
-  if (!pendingDeleteSachId) return;
-  const btn = document.getElementById("deleteConfirmSubmit");
-  const errorEl = document.getElementById("deleteConfirmError");
-
-  btn.disabled = true;
-  btn.textContent = "Đang xóa...";
-  errorEl.classList.add("is-hidden");
-
-  try {
-    await fetchJson(`/sach/${pendingDeleteSachId}`, { method: "DELETE" });
-    showToast("Xóa sách thành công!");
-    closeDeleteConfirm();
-    loadSachList();
-  } catch (error) {
-    console.error("Lỗi xóa sách:", error);
-    errorEl.textContent = toFriendlyMessage(error);
-    errorEl.classList.remove("is-hidden");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Xóa sách";
-  }
-}
-
-/* ========================================================================
-   DASHBOARD: SIDEBAR + LỌC SÁCH THEO TRẠNG THÁI
-   ======================================================================== */
-
-function bindDashboardEvents() {
-  const tabs = document.querySelectorAll(".tab");
-
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      tabs.forEach((t) => t.classList.remove("active"));
-      tab.classList.add("active");
       applyFilters();
-    });
-  });
-  el.menuToggle?.addEventListener("click", () => {
-    el.sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
-  });
-  el.sidebarBackdrop?.addEventListener("click", closeSidebar);
+    }
 
-  document.getElementById("searchInput")?.addEventListener("input", applyFilters);
-  document.getElementById("yearFrom")?.addEventListener("input", applyFilters);
-  document.getElementById("yearTo")?.addEventListener("input", applyFilters);
-  document.getElementById("searchButton")?.addEventListener("click", (event) => {
-    event.preventDefault();
-    applyFilters();
-  });
-}
+    function applyFilters() {
+      const activeTab = document.querySelector(".tab.active");
+      const statusFilter = activeTab?.dataset.filter || "all";
 
-function openSidebar() {
-  el.sidebar?.classList.add("open");
-  el.sidebarBackdrop?.classList.add("show");
-}
+      const searchValue = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+      const yearFromRaw = document.getElementById("yearFrom")?.value;
+      const yearToRaw = document.getElementById("yearTo")?.value;
+      const yearFrom = yearFromRaw ? Number(yearFromRaw) : null;
+      const yearTo = yearToRaw ? Number(yearToRaw) : null;
 
-function closeSidebar() {
-  el.sidebar?.classList.remove("open");
-  el.sidebarBackdrop?.classList.remove("show");
-}
+      document.querySelectorAll(".book-card").forEach((card) => {
+        const statusMatch = statusFilter === "all" || card.dataset.status === statusFilter;
 
-// Được gọi trực tiếp từ nút X trong sidebar (onclick="closeSidebar()")
-window.closeSidebar = closeSidebar;
+        const textMatch =
+          !searchValue ||
+          (card.dataset.tenSach || "").includes(searchValue) ||
+          (card.dataset.tacGia || "").includes(searchValue);
 
-/* ========================================================================
-   CHUYỂN TAB (Kho sách / Phiếu mượn / Độc giả)
-   ======================================================================== */
+        const year = Number(card.dataset.namXuatBan);
+        const yearMatch =
+          (yearFrom === null || year >= yearFrom) &&
+          (yearTo === null || year <= yearTo);
 
-const PANEL_BY_VIEW = {
-  "kho-sach": "panelKhoSach",
-  "phieu-muon": "panelPhieuMuon",
-  "doc-gia": "panelDocGia",
-};
+        const match = statusMatch && textMatch && yearMatch;
+        card.style.display = match ? "" : "none";
+      });
+    }
 
-function bindNavEvents() {
-  const navItems = document.querySelectorAll(".nav-item[data-view]");
-  navItems.forEach((item) => {
-    item.addEventListener("click", (event) => {
-      event.preventDefault();
-      const view = item.dataset.view;
-      switchView(view);
-      navItems.forEach((i) => i.classList.remove("active"));
-      item.classList.add("active");
-      closeSidebar();
-    });
-  });
-}
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = value ?? "";
+      return div.innerHTML;
+    }
 
-function switchView(view) {
-  Object.values(PANEL_BY_VIEW).forEach((panelId) => {
-    document.getElementById(panelId)?.classList.add("is-hidden");
-  });
-  const targetId = PANEL_BY_VIEW[view];
-  document.getElementById(targetId)?.classList.remove("is-hidden");
+    let currentSachList = [];
 
-  if (view === "phieu-muon") {
-    loadPhieuMuonView();
-  }
-}
+    function bindBookModalEvents() {
+      const backdrop = document.getElementById("bookModalBackdrop");
+      const closeBtn = document.getElementById("bookModalClose");
+      const grid = document.getElementById("grid");
 
-/* ========================================================================
-   PHIẾU MƯỢN: Bước 1 (chọn độc giả + sách) -> Bước 2 (xác nhận) -> Bước 3 (thông báo)
-   ======================================================================== */
+      closeBtn?.addEventListener("click", closeBookModal);
+      backdrop?.addEventListener("click", (event) => {
+        if (event.target === backdrop) closeBookModal();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeBookModal();
+          closeBookForm();
+          closeDeleteConfirm();
+        }
+      });
 
-let currentDocGiaList = [];
-let currentPhieuMuonList = [];
-let pendingLoan = null; // { sachId, tenSach, docGiaId, docGiaTen }
-let loanViewLoaded = false;
+      grid?.addEventListener("click", (event) => {
+        const link = event.target.closest(".book-card__link");
+        const editBtn = event.target.closest(".edit-book-btn");
+        const deleteBtn = event.target.closest(".delete-book-btn");
 
-async function loadPhieuMuonView() {
-  const tableBody = document.getElementById("loanBookTableBody");
-  const historyList = document.getElementById("loanHistoryList");
+        if (link) {
+          event.preventDefault();
+          const card = link.closest(".book-card");
+          const sachId = card?.dataset.sachId;
+          const sach = currentSachList.find((item) => String(item.id) === String(sachId));
+          if (sach) openBookModal(sach);
+        } else if (editBtn) {
+          event.preventDefault();
+          const sachId = editBtn.dataset.id;
+          const sach = currentSachList.find((item) => String(item.id) === String(sachId));
+          if (sach) openBookForm(sach);
+        } else if (deleteBtn) {
+          event.preventDefault();
+          const sachId = deleteBtn.dataset.id;
+          openDeleteConfirm(sachId);
+        }
+      });
 
-  try {
-    const tasks = [loadDocGiaList(), loadPhieuMuonList()];
-    // Danh sách sách: dùng lại currentSachList nếu Kho sách đã tải xong, không thì tải mới.
-    if (!currentSachList.length) tasks.push(loadSachList());
-    await Promise.all(tasks);
+      // Book form events
+      document.getElementById("addBookBtn")?.addEventListener("click", () => openBookForm());
+      document.getElementById("bookFormClose")?.addEventListener("click", closeBookForm);
+      document.getElementById("bookFormCancelBtn")?.addEventListener("click", closeBookForm);
+      document.getElementById("bookFormBackdrop")?.addEventListener("click", (event) => {
+        if (event.target.id === "bookFormBackdrop") closeBookForm();
+      });
+      document.getElementById("bookForm")?.addEventListener("submit", submitBookForm);
 
-    renderLoanBookTable();
-    renderLoanHistory();
-    loanViewLoaded = true;
-  } catch (error) {
-    console.error("Loi tai du lieu phieu muon:", error);
-    if (tableBody) tableBody.innerHTML = `<tr><td colspan="4" class="empty-state">${escapeHtml(toFriendlyMessage(error))}</td></tr>`;
-    if (historyList) historyList.innerHTML = `<p class="empty-state">${escapeHtml(toFriendlyMessage(error))}</p>`;
-    showToast(toFriendlyMessage(error));
-  }
-}
+      // Image upload & Auto Fetch
+      document.getElementById("bookFormAutoFetchBtn")?.addEventListener("click", () => {
+        const title = document.getElementById("bookFormName")?.value.trim();
+        if (!title) {
+          showToast("Vui lòng nhập Tên sách trước khi tìm ảnh.");
+          return;
+        }
+        const keyword = encodeURIComponent(title);
+        window.open(`https://www.pinterest.com/search/pins/?q=${keyword}`, '_blank');
+        showToast("Đã mở Pinterest! Hãy copy địa chỉ hình ảnh (Copy image address) bạn thích và dán vào ô URL nhé.");
+      });
 
-async function loadDocGiaList() {
-  currentDocGiaList = await fetchJson("/doc-gia");
-  renderDocGiaOptions();
-}
+      document.getElementById("bookFormUploadBtn")?.addEventListener("click", () => {
+        document.getElementById("bookFormFile")?.click();
+      });
+      document.getElementById("bookFormFile")?.addEventListener("change", handleImageUpload);
+      document.getElementById("bookFormImageStr")?.addEventListener("input", updateImagePreview);
 
-async function loadPhieuMuonList() {
-  currentPhieuMuonList = await fetchJson("/phieu-muon");
-}
+      // Delete confirm events
+      document.getElementById("deleteConfirmClose")?.addEventListener("click", closeDeleteConfirm);
+      document.getElementById("deleteConfirmCancel")?.addEventListener("click", closeDeleteConfirm);
+      document.getElementById("deleteConfirmBackdrop")?.addEventListener("click", (event) => {
+        if (event.target.id === "deleteConfirmBackdrop") closeDeleteConfirm();
+      });
+      document.getElementById("deleteConfirmSubmit")?.addEventListener("click", submitDeleteConfirm);
+    }
 
-function renderDocGiaOptions() {
-  const select = document.getElementById("loanDocGiaSelect");
-  if (!select) return;
-  const previousValue = select.value;
-
-  select.innerHTML = `<option value="">-- Chọn độc giả --</option>`;
-  currentDocGiaList.forEach((docGia) => {
-    const option = document.createElement("option");
-    option.value = docGia.id;
-    option.textContent = docGia.ho_ten;
-    select.appendChild(option);
-  });
-
-  if (previousValue && currentDocGiaList.some((d) => String(d.id) === previousValue)) {
-    select.value = previousValue;
-  }
-}
-
-function renderLoanBookTable() {
-  const tableBody = document.getElementById("loanBookTableBody");
-  if (!tableBody) return;
-
-  const searchValue = (document.getElementById("loanSearchInput")?.value || "").trim().toLowerCase();
-  const borrowedSachIds = getBorrowedSachIds();
-
-  const rows = currentSachList
-    .filter((sach) => !borrowedSachIds.has(String(sach.id)))
-    .filter((sach) => {
-      if (!searchValue) return true;
-      return (
-        (sach.ten_sach || "").toLowerCase().includes(searchValue) ||
-        (sach.tac_gia || "").toLowerCase().includes(searchValue)
-      );
-    })
-    .map((sach) => {
+    function openBookModal(sach) {
       const soLuong = Number(sach.so_luong) || 0;
-      const outOfStock = soLuong <= 0;
-      const qtyClass = outOfStock ? "loan-table__qty loan-table__qty--out" : "loan-table__qty";
-      return `
+      const status = soLuong > 0 ? "Con hang" : "Het hang";
+      const cover = soLuong > 0 ? "\ud83d\udcd7" : "\ud83d\udcd5";
+
+      const coverHtml = sach.hinh_anh
+        ? `<img src="${escapeHtml(sach.hinh_anh)}" style="width:100px; height:140px; object-fit:cover; border-radius:9px;" onerror="this.onerror=null; this.src='https://placehold.co/300x450/0f172a/ffffff?text=No+Image';" />`
+        : cover;
+
+      document.getElementById("bookModalCover").innerHTML = coverHtml;
+      document.getElementById("bookModalTitle").textContent = sach.ten_sach ?? "";
+      document.getElementById("bookModalAuthor").textContent = sach.tac_gia ?? "";
+      document.getElementById("bookModalGenre").textContent = sach.the_loai ?? "";
+      document.getElementById("bookModalYear").textContent = sach.nam_xuat_ban ?? "";
+      document.getElementById("bookModalQty").textContent = `${soLuong} quyen`;
+      document.getElementById("bookModalStatus").textContent = status;
+
+      document.getElementById("bookModalBackdrop").classList.add("show");
+    }
+
+    function closeBookModal() {
+      document.getElementById("bookModalBackdrop").classList.remove("show");
+    }
+
+    function openBookForm(sach = null) {
+      const form = document.getElementById("bookForm");
+      const title = document.getElementById("bookFormTitle");
+      const error = document.getElementById("bookFormError");
+
+      form.reset();
+      error.classList.add("is-hidden");
+      error.textContent = "";
+
+      if (sach) {
+        title.textContent = "Sửa sách";
+        document.getElementById("bookFormId").value = sach.id;
+        document.getElementById("bookFormName").value = sach.ten_sach || "";
+        document.getElementById("bookFormAuthor").value = sach.tac_gia || "";
+        document.getElementById("bookFormGenre").value = sach.the_loai || "";
+        document.getElementById("bookFormYear").value = sach.nam_xuat_ban || "";
+        document.getElementById("bookFormQty").value = sach.so_luong || 0;
+        document.getElementById("bookFormImageStr").value = sach.hinh_anh || "";
+      } else {
+        title.textContent = "Thêm sách mới";
+        document.getElementById("bookFormId").value = "";
+        document.getElementById("bookFormQty").value = 1;
+      }
+
+      // Render Preset Covers
+      const presetContainer = document.getElementById("presetCoversContainer");
+      if (presetContainer) {
+        const presets = [
+          "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&h=600&fit=crop", // Book stack
+          "https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=400&h=600&fit=crop", // Open book
+          "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=400&h=600&fit=crop", // Library
+          "https://images.unsplash.com/photo-1456953180671-730de08edaa7?q=80&w=400&h=600&fit=crop", // Vintage book
+          "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=400&h=600&fit=crop", // Coffee and book
+          "https://images.unsplash.com/photo-1550399105-c4db5fb85c18?q=80&w=400&h=600&fit=crop"  // Minimal book
+        ];
+        presetContainer.innerHTML = presets.map(url =>
+          `<img src="${url}" class="preset-cover" style="width:36px; height:48px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--line-200);" onclick="document.getElementById('bookFormImageStr').value='${url}'; updateImagePreview();" />`
+        ).join("");
+      }
+
+      updateImagePreview();
+      document.getElementById("bookFormBackdrop").classList.add("show");
+    }
+
+    function closeBookForm() {
+      document.getElementById("bookFormBackdrop").classList.remove("show");
+    }
+
+    function updateImagePreview() {
+      const imageStr = document.getElementById("bookFormImageStr").value.trim();
+      const preview = document.getElementById("bookFormImagePreview");
+      if (imageStr) {
+        preview.innerHTML = `<img src="${escapeHtml(imageStr)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='https://placehold.co/300x450/0f172a/ffffff?text=No+Image';" />`;
+      } else {
+        preview.innerHTML = `<span>Trống</span>`;
+      }
+    }
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById("bookFormImageStr").value = e.target.result;
+        updateImagePreview();
+      };
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    }
+
+    async function submitBookForm(event) {
+      event.preventDefault();
+      const btn = document.getElementById("bookFormSubmitBtn");
+      const errorEl = document.getElementById("bookFormError");
+      const id = document.getElementById("bookFormId").value;
+
+      const payload = {
+        ten_sach: document.getElementById("bookFormName").value.trim(),
+        tac_gia: document.getElementById("bookFormAuthor").value.trim(),
+        the_loai: document.getElementById("bookFormGenre").value.trim(),
+        nam_xuat_ban: Number(document.getElementById("bookFormYear").value),
+        so_luong: Number(document.getElementById("bookFormQty").value),
+        hinh_anh: document.getElementById("bookFormImageStr").value.trim()
+      };
+
+      btn.disabled = true;
+      btn.textContent = "Đang lưu...";
+      errorEl.classList.add("is-hidden");
+
+      try {
+        if (id) {
+          await fetchJson(`/sach/${id}`, { method: "PUT", body: payload });
+          showToast("Cập nhật sách thành công!");
+        } else {
+          await fetchJson(`/sach`, { method: "POST", body: payload });
+          showToast("Thêm sách thành công!");
+        }
+        closeBookForm();
+        loadSachList();
+      } catch (error) {
+        console.error("Lỗi lưu sách:", error);
+        errorEl.textContent = toFriendlyMessage(error);
+        errorEl.classList.remove("is-hidden");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Lưu sách";
+      }
+    }
+
+    let pendingDeleteSachId = null;
+
+    function openDeleteConfirm(id) {
+      const sach = currentSachList.find((item) => String(item.id) === String(id));
+      if (!sach) return;
+      pendingDeleteSachId = id;
+      document.getElementById("deleteConfirmSach").textContent = sach.ten_sach;
+      document.getElementById("deleteConfirmError").classList.add("is-hidden");
+      document.getElementById("deleteConfirmBackdrop").classList.add("show");
+    }
+
+    function closeDeleteConfirm() {
+      document.getElementById("deleteConfirmBackdrop").classList.remove("show");
+      pendingDeleteSachId = null;
+    }
+
+    async function submitDeleteConfirm() {
+      if (!pendingDeleteSachId) return;
+      const btn = document.getElementById("deleteConfirmSubmit");
+      const errorEl = document.getElementById("deleteConfirmError");
+
+      btn.disabled = true;
+      btn.textContent = "Đang xóa...";
+      errorEl.classList.add("is-hidden");
+
+      try {
+        await fetchJson(`/sach/${pendingDeleteSachId}`, { method: "DELETE" });
+        showToast("Xóa sách thành công!");
+        closeDeleteConfirm();
+        loadSachList();
+      } catch (error) {
+        console.error("Lỗi xóa sách:", error);
+        errorEl.textContent = toFriendlyMessage(error);
+        errorEl.classList.remove("is-hidden");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Xóa sách";
+      }
+    }
+
+    /* ========================================================================
+       DASHBOARD: SIDEBAR + LỌC SÁCH THEO TRẠNG THÁI
+       ======================================================================== */
+
+    function bindDashboardEvents() {
+      const tabs = document.querySelectorAll(".tab");
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          tabs.forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          applyFilters();
+        });
+      });
+      el.menuToggle?.addEventListener("click", () => {
+        el.sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
+      });
+      el.sidebarBackdrop?.addEventListener("click", closeSidebar);
+
+      document.getElementById("searchInput")?.addEventListener("input", applyFilters);
+      document.getElementById("yearFrom")?.addEventListener("input", applyFilters);
+      document.getElementById("yearTo")?.addEventListener("input", applyFilters);
+      document.getElementById("searchButton")?.addEventListener("click", (event) => {
+        event.preventDefault();
+        applyFilters();
+      });
+    }
+
+    function openSidebar() {
+      el.sidebar?.classList.add("open");
+      el.sidebarBackdrop?.classList.add("show");
+    }
+
+    function closeSidebar() {
+      el.sidebar?.classList.remove("open");
+      el.sidebarBackdrop?.classList.remove("show");
+    }
+
+    // Được gọi trực tiếp từ nút X trong sidebar (onclick="closeSidebar()")
+    window.closeSidebar = closeSidebar;
+
+    /* ========================================================================
+       CHUYỂN TAB (Kho sách / Phiếu mượn / Độc giả)
+       ======================================================================== */
+
+    const PANEL_BY_VIEW = {
+      "kho-sach": "panelKhoSach",
+      "phieu-muon": "panelPhieuMuon",
+      "doc-gia": "panelDocGia",
+    };
+
+    function bindNavEvents() {
+      const navItems = document.querySelectorAll(".nav-item[data-view]");
+      navItems.forEach((item) => {
+        item.addEventListener("click", (event) => {
+          event.preventDefault();
+          const view = item.dataset.view;
+          switchView(view);
+          navItems.forEach((i) => i.classList.remove("active"));
+          item.classList.add("active");
+          closeSidebar();
+        });
+      });
+    }
+
+    function switchView(view) {
+      Object.values(PANEL_BY_VIEW).forEach((panelId) => {
+        document.getElementById(panelId)?.classList.add("is-hidden");
+      });
+      const targetId = PANEL_BY_VIEW[view];
+      document.getElementById(targetId)?.classList.remove("is-hidden");
+
+      if (view === "phieu-muon") {
+        loadPhieuMuonView();
+      }
+    }
+
+    /* ========================================================================
+       PHIẾU MƯỢN: Bước 1 (chọn độc giả + sách) -> Bước 2 (xác nhận) -> Bước 3 (thông báo)
+       ======================================================================== */
+
+    let currentDocGiaList = [];
+    let currentPhieuMuonList = [];
+    let pendingLoan = null; // { sachId, tenSach, docGiaId, docGiaTen }
+    let loanViewLoaded = false;
+
+    async function loadPhieuMuonView() {
+      const tableBody = document.getElementById("loanBookTableBody");
+      const historyList = document.getElementById("loanHistoryList");
+
+      try {
+        const tasks = [loadDocGiaList(), loadPhieuMuonList()];
+        // Danh sách sách: dùng lại currentSachList nếu Kho sách đã tải xong, không thì tải mới.
+        if (!currentSachList.length) tasks.push(loadSachList());
+        await Promise.all(tasks);
+
+        renderLoanBookTable();
+        renderLoanHistory();
+        loanViewLoaded = true;
+      } catch (error) {
+        console.error("Loi tai du lieu phieu muon:", error);
+        if (tableBody) tableBody.innerHTML = `<tr><td colspan="4" class="empty-state">${escapeHtml(toFriendlyMessage(error))}</td></tr>`;
+        if (historyList) historyList.innerHTML = `<p class="empty-state">${escapeHtml(toFriendlyMessage(error))}</p>`;
+        showToast(toFriendlyMessage(error));
+      }
+    }
+
+    async function loadDocGiaList() {
+      currentDocGiaList = await fetchJson("/doc-gia");
+      renderDocGiaOptions();
+    }
+
+    async function loadPhieuMuonList() {
+      currentPhieuMuonList = await fetchJson("/phieu-muon");
+    }
+
+    function renderDocGiaOptions() {
+      const select = document.getElementById("loanDocGiaSelect");
+      if (!select) return;
+      const previousValue = select.value;
+
+      select.innerHTML = `<option value="">-- Chọn độc giả --</option>`;
+      currentDocGiaList.forEach((docGia) => {
+        const option = document.createElement("option");
+        option.value = docGia.id;
+        option.textContent = docGia.ho_ten;
+        select.appendChild(option);
+      });
+
+      if (previousValue && currentDocGiaList.some((d) => String(d.id) === previousValue)) {
+        select.value = previousValue;
+      }
+    }
+
+    function renderLoanBookTable() {
+      const tableBody = document.getElementById("loanBookTableBody");
+      if (!tableBody) return;
+
+      const searchValue = (document.getElementById("loanSearchInput")?.value || "").trim().toLowerCase();
+      const borrowedSachIds = getBorrowedSachIds();
+
+      const rows = currentSachList
+        .filter((sach) => !borrowedSachIds.has(String(sach.id)))
+        .filter((sach) => {
+          if (!searchValue) return true;
+          return (
+            (sach.ten_sach || "").toLowerCase().includes(searchValue) ||
+            (sach.tac_gia || "").toLowerCase().includes(searchValue)
+          );
+        })
+        .map((sach) => {
+          const soLuong = Number(sach.so_luong) || 0;
+          const outOfStock = soLuong <= 0;
+          const qtyClass = outOfStock ? "loan-table__qty loan-table__qty--out" : "loan-table__qty";
+          return `
         <tr data-sach-id="${sach.id}">
           <td>${escapeHtml(sach.ten_sach)}</td>
           <td class="loan-table__author">${escapeHtml(sach.tac_gia)}</td>
@@ -1414,55 +2359,55 @@ function renderLoanBookTable() {
           </td>
         </tr>
       `;
-    })
-    .join("");
+        })
+        .join("");
 
-  tableBody.innerHTML = rows || `<tr><td colspan="4" class="empty-state">Không tìm thấy sách phù hợp.</td></tr>`;
-}
+      tableBody.innerHTML = rows || `<tr><td colspan="4" class="empty-state">Không tìm thấy sách phù hợp.</td></tr>`;
+    }
 
-// Trạng thái phiếu mượn: "dang" (đang mượn), "tra" (đã trả), "huy" (đã hủy)
-function getLoanStatus(phieu) {
-  if (phieu.trang_thai === "Đã hủy") return "huy";
-  if (phieu.ngay_tra || phieu.trang_thai === "Đã trả") return "tra";
-  return "dang";
-}
+    // Trạng thái phiếu mượn: "dang" (đang mượn), "tra" (đã trả), "huy" (đã hủy)
+    function getLoanStatus(phieu) {
+      if (phieu.trang_thai === "Đã hủy") return "huy";
+      if (phieu.ngay_tra || phieu.trang_thai === "Đã trả") return "tra";
+      return "dang";
+    }
 
-// Danh sách sach_id đang được mượn (chưa trả, chưa hủy) — dùng để ẩn khỏi danh sách cho mượn
-function getBorrowedSachIds() {
-  return new Set(
-    currentPhieuMuonList
-      .filter((phieu) => getLoanStatus(phieu) === "dang")
-      .map((phieu) => String(phieu.sach_id))
-  );
-}
+    // Danh sách sach_id đang được mượn (chưa trả, chưa hủy) — dùng để ẩn khỏi danh sách cho mượn
+    function getBorrowedSachIds() {
+      return new Set(
+        currentPhieuMuonList
+          .filter((phieu) => getLoanStatus(phieu) === "dang")
+          .map((phieu) => String(phieu.sach_id))
+      );
+    }
 
-function renderLoanHistory() {
-  const historyList = document.getElementById("loanHistoryList");
-  if (!historyList) return;
+    function renderLoanHistory() {
+      const historyList = document.getElementById("loanHistoryList");
+      if (!historyList) return;
 
-  if (!currentPhieuMuonList.length) {
-    historyList.innerHTML = `<p class="empty-state">Chưa có phiếu mượn nào.</p>`;
-    return;
-  }
+      if (!currentPhieuMuonList.length) {
+        historyList.innerHTML = `<p class="empty-state">Chưa có phiếu mượn nào.</p>`;
+        return;
+      }
 
-  const sorted = [...currentPhieuMuonList].sort((a, b) => (b.id || 0) - (a.id || 0));
+      const sorted = [...currentPhieuMuonList].sort((a, b) => (b.id || 0) - (a.id || 0));
 
-  const statusMeta = {
-    dang: { className: "loan-status loan-status--dang", label: "Đang mượn" },
-    tra: { className: "loan-status loan-status--tra", label: "Đã trả" },
-    huy: { className: "loan-status loan-status--huy", label: "Đã hủy" },
-  };
+      const statusMeta = {
+        dang: { className: "loan-status loan-status--dang", label: "Đang mượn" },
+        tra: { className: "loan-status loan-status--tra", label: "Đã trả" },
+        huy: { className: "loan-status loan-status--huy", label: "Đã hủy" },
+      };
 
-  historyList.innerHTML = sorted
-    .map((phieu) => {
-      const sach = currentSachList.find((s) => String(s.id) === String(phieu.sach_id));
-      const docGia = currentDocGiaList.find((d) => String(d.id) === String(phieu.doc_gia_id));
-      const status = getLoanStatus(phieu);
-      const { className: statusClass, label: statusLabel } = statusMeta[status];
-      // Chỉ cho phép hủy mượn khi sách đang ở trạng thái "Đang mượn"
-      const canCancel = status === "dang";
+      historyList.innerHTML = sorted
+        .map((phieu) => {
+          const sach = currentSachList.find((s) => String(s.id) === String(phieu.sach_id));
+          const docGia = currentDocGiaList.find((d) => String(d.id) === String(phieu.doc_gia_id));
+          const status = getLoanStatus(phieu);
+          const { className: statusClass, label: statusLabel } = statusMeta[status];
+          // Chỉ cho phép hủy mượn khi sách đang ở trạng thái "Đang mượn"
+          const canCancel = status === "dang";
 
-      return `
+          return `
         <div class="loan-history__item">
           <div class="loan-history__item-top">
             <span class="loan-history__title">${escapeHtml(sach?.ten_sach || `Sách #${phieu.sach_id}`)}</span>
@@ -1478,339 +2423,344 @@ function renderLoanHistory() {
           </div>` : ""}
         </div>
       `;
-    })
-    .join("");
-}
+        })
+        .join("");
+    }
 
-function formatDateVn(isoDate) {
-  if (!isoDate) return "—";
-  const parts = String(isoDate).slice(0, 10).split("-");
-  if (parts.length !== 3) return isoDate;
-  const [y, m, d] = parts;
-  return `${d}/${m}/${y}`;
-}
+    function formatDateVn(isoDate) {
+      if (!isoDate) return "—";
+      const parts = String(isoDate).slice(0, 10).split("-");
+      if (parts.length !== 3) return isoDate;
+      const [y, m, d] = parts;
+      return `${d}/${m}/${y}`;
+    }
 
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
-}
+    function todayIso() {
+      return new Date().toISOString().slice(0, 10);
+    }
 
-function bindLoanEvents() {
-  document.getElementById("loanSearchInput")?.addEventListener("input", renderLoanBookTable);
+    function bindLoanEvents() {
+      document.getElementById("loanSearchInput")?.addEventListener("input", renderLoanBookTable);
 
-  document.getElementById("loanBookTableBody")?.addEventListener("click", (event) => {
-    const button = event.target.closest(".btn-borrow");
-    if (!button || button.disabled) return;
-    handleBorrowClick(button.dataset.sachId);
-  });
+      document.getElementById("loanBookTableBody")?.addEventListener("click", (event) => {
+        const button = event.target.closest(".btn-borrow");
+        if (!button || button.disabled) return;
+        handleBorrowClick(button.dataset.sachId);
+      });
 
-  // Bước 2: popup xác nhận
-  document.getElementById("loanConfirmClose")?.addEventListener("click", closeLoanConfirm);
-  document.getElementById("loanConfirmCancel")?.addEventListener("click", closeLoanConfirm);
-  document.getElementById("loanConfirmBackdrop")?.addEventListener("click", (event) => {
-    if (event.target.id === "loanConfirmBackdrop") closeLoanConfirm();
-  });
-  document.getElementById("loanConfirmSubmit")?.addEventListener("click", submitLoanConfirm);
+      // Bước 2: popup xác nhận
+      document.getElementById("loanConfirmClose")?.addEventListener("click", closeLoanConfirm);
+      document.getElementById("loanConfirmCancel")?.addEventListener("click", closeLoanConfirm);
+      document.getElementById("loanConfirmBackdrop")?.addEventListener("click", (event) => {
+        if (event.target.id === "loanConfirmBackdrop") closeLoanConfirm();
+      });
+      document.getElementById("loanConfirmSubmit")?.addEventListener("click", submitLoanConfirm);
 
-  // Bước 3: thông báo thành công
-  document.getElementById("loanSuccessClose")?.addEventListener("click", closeLoanSuccess);
-  document.getElementById("loanSuccessOk")?.addEventListener("click", closeLoanSuccess);
-  document.getElementById("loanSuccessBackdrop")?.addEventListener("click", (event) => {
-    if (event.target.id === "loanSuccessBackdrop") closeLoanSuccess();
-  });
+      // Bước 3: thông báo thành công
+      document.getElementById("loanSuccessClose")?.addEventListener("click", closeLoanSuccess);
+      document.getElementById("loanSuccessOk")?.addEventListener("click", closeLoanSuccess);
+      document.getElementById("loanSuccessBackdrop")?.addEventListener("click", (event) => {
+        if (event.target.id === "loanSuccessBackdrop") closeLoanSuccess();
+      });
 
-  // Hủy mượn: nút trong lịch sử mượn + popup xác nhận hủy
-  document.getElementById("loanHistoryList")?.addEventListener("click", (event) => {
-    const button = event.target.closest(".btn-cancel-loan");
-    if (!button) return;
-    openCancelConfirm(button.dataset.phieuId);
-  });
-  document.getElementById("cancelConfirmClose")?.addEventListener("click", closeCancelConfirm);
-  document.getElementById("cancelConfirmCancel")?.addEventListener("click", closeCancelConfirm);
-  document.getElementById("cancelConfirmBackdrop")?.addEventListener("click", (event) => {
-    if (event.target.id === "cancelConfirmBackdrop") closeCancelConfirm();
-  });
-  document.getElementById("cancelConfirmSubmit")?.addEventListener("click", submitCancelConfirm);
+      // Hủy mượn: nút trong lịch sử mượn + popup xác nhận hủy
+      document.getElementById("loanHistoryList")?.addEventListener("click", (event) => {
+        const button = event.target.closest(".btn-cancel-loan");
+        if (!button) return;
+        openCancelConfirm(button.dataset.phieuId);
+      });
+      document.getElementById("cancelConfirmClose")?.addEventListener("click", closeCancelConfirm);
+      document.getElementById("cancelConfirmCancel")?.addEventListener("click", closeCancelConfirm);
+      document.getElementById("cancelConfirmBackdrop")?.addEventListener("click", (event) => {
+        if (event.target.id === "cancelConfirmBackdrop") closeCancelConfirm();
+      });
+      document.getElementById("cancelConfirmSubmit")?.addEventListener("click", submitCancelConfirm);
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-    closeLoanConfirm();
-    closeLoanSuccess();
-    closeCancelConfirm();
-  });
-}
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        closeLoanConfirm();
+        closeLoanSuccess();
+        closeCancelConfirm();
+      });
+    }
 
-function handleBorrowClick(sachId) {
-  const select = document.getElementById("loanDocGiaSelect");
-  const docGiaId = select?.value;
+    function handleBorrowClick(sachId) {
+      const select = document.getElementById("loanDocGiaSelect");
+      const docGiaId = select?.value;
 
-  if (!docGiaId) {
-    showToast("Vui lòng chọn độc giả trước khi mượn sách.");
-    select?.focus();
-    return;
-  }
+      if (!docGiaId) {
+        showToast("Vui lòng chọn độc giả trước khi mượn sách.");
+        select?.focus();
+        return;
+      }
 
-  const sach = currentSachList.find((item) => String(item.id) === String(sachId));
-  const docGia = currentDocGiaList.find((item) => String(item.id) === String(docGiaId));
-  if (!sach || !docGia) return;
+      const sach = currentSachList.find((item) => String(item.id) === String(sachId));
+      const docGia = currentDocGiaList.find((item) => String(item.id) === String(docGiaId));
+      if (!sach || !docGia) return;
 
-  pendingLoan = {
-    sachId: sach.id,
-    tenSach: sach.ten_sach,
-    docGiaId: docGia.id,
-    docGiaTen: docGia.ho_ten,
-  };
+      pendingLoan = {
+        sachId: sach.id,
+        tenSach: sach.ten_sach,
+        docGiaId: docGia.id,
+        docGiaTen: docGia.ho_ten,
+      };
 
-  openLoanConfirm();
-}
+      openLoanConfirm();
+    }
 
-function openLoanConfirm() {
-  if (!pendingLoan) return;
-  document.getElementById("loanConfirmDocGia").textContent = pendingLoan.docGiaTen;
-  document.getElementById("loanConfirmSach").textContent = pendingLoan.tenSach;
-  document.getElementById("loanConfirmDate").textContent = formatDateVn(todayIso());
-  setLoanConfirmError("");
-  document.getElementById("loanConfirmBackdrop")?.classList.add("show");
-}
+    function openLoanConfirm() {
+      if (!pendingLoan) return;
+      document.getElementById("loanConfirmDocGia").textContent = pendingLoan.docGiaTen;
+      document.getElementById("loanConfirmSach").textContent = pendingLoan.tenSach;
+      document.getElementById("loanConfirmDate").textContent = formatDateVn(todayIso());
+      setLoanConfirmError("");
+      document.getElementById("loanConfirmBackdrop")?.classList.add("show");
+    }
 
-function closeLoanConfirm() {
-  document.getElementById("loanConfirmBackdrop")?.classList.remove("show");
-  pendingLoan = null;
-}
+    function closeLoanConfirm() {
+      document.getElementById("loanConfirmBackdrop")?.classList.remove("show");
+      pendingLoan = null;
+    }
 
-function setLoanConfirmError(message) {
-  const el = document.getElementById("loanConfirmError");
-  if (!el) return;
-  el.textContent = message;
-  el.classList.toggle("is-hidden", !message);
-}
+    function setLoanConfirmError(message) {
+      const el = document.getElementById("loanConfirmError");
+      if (!el) return;
+      el.textContent = message;
+      el.classList.toggle("is-hidden", !message);
+    }
 
-async function submitLoanConfirm() {
-  if (!pendingLoan) return;
-  const submitButton = document.getElementById("loanConfirmSubmit");
-  submitButton.disabled = true;
-  submitButton.textContent = "Đang xử lý...";
-  setLoanConfirmError("");
+    async function submitLoanConfirm() {
+      if (!pendingLoan) return;
+      const submitButton = document.getElementById("loanConfirmSubmit");
+      submitButton.disabled = true;
+      submitButton.textContent = "Đang xử lý...";
+      setLoanConfirmError("");
 
-  try {
-    await fetchJson("/phieu-muon", {
-      method: "POST",
-      body: {
-        doc_gia_id: Number(pendingLoan.docGiaId),
-        sach_id: Number(pendingLoan.sachId),
-        ngay_muon: todayIso(),
-      },
-    });
+      try {
+        await fetchJson("/phieu-muon", {
+          method: "POST",
+          body: {
+            doc_gia_id: Number(pendingLoan.docGiaId),
+            sach_id: Number(pendingLoan.sachId),
+            ngay_muon: todayIso(),
+          },
+        });
 
-    const successDesc = `Độc giả "${pendingLoan.docGiaTen}" đã mượn sách "${pendingLoan.tenSach}".`;
-    closeLoanConfirm();
-    await Promise.all([loadPhieuMuonList(), loadSachList()]);
-    renderLoanBookTable();
-    renderLoanHistory();
-    openLoanSuccess(successDesc);
-  } catch (error) {
-    console.error("Loi tao phieu muon:", error);
-    setLoanConfirmError(toFriendlyMessage(error));
-  } finally {
-    submitButton.disabled = false;
-    submitButton.textContent = "Xác nhận mượn";
-  }
-}
+        const successDesc = `Độc giả "${pendingLoan.docGiaTen}" đã mượn sách "${pendingLoan.tenSach}".`;
+        closeLoanConfirm();
+        await Promise.all([loadPhieuMuonList(), loadSachList()]);
+        renderLoanBookTable();
+        renderLoanHistory();
+        openLoanSuccess(successDesc);
+      } catch (error) {
+        console.error("Loi tao phieu muon:", error);
+        setLoanConfirmError(toFriendlyMessage(error));
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Xác nhận mượn";
+      }
+    }
 
-function openLoanSuccess(description) {
-  document.getElementById("loanSuccessDesc").textContent = description;
-  document.getElementById("loanSuccessBackdrop")?.classList.add("show");
-}
+    function openLoanSuccess(description) {
+      document.getElementById("loanSuccessDesc").textContent = description;
+      document.getElementById("loanSuccessBackdrop")?.classList.add("show");
+    }
 
-function closeLoanSuccess() {
-  document.getElementById("loanSuccessBackdrop")?.classList.remove("show");
-}
+    function closeLoanSuccess() {
+      document.getElementById("loanSuccessBackdrop")?.classList.remove("show");
+    }
 
-/* ---------- Hủy mượn ---------- */
-let pendingCancel = null; // { id }
+    /* ---------- Hủy mượn ---------- */
+    let pendingCancel = null; // { id }
 
-function openCancelConfirm(phieuId) {
-  const phieu = currentPhieuMuonList.find((p) => String(p.id) === String(phieuId));
-  if (!phieu || getLoanStatus(phieu) !== "dang") return; // chỉ hủy được khi đang mượn
+    function openCancelConfirm(phieuId) {
+      const phieu = currentPhieuMuonList.find((p) => String(p.id) === String(phieuId));
+      if (!phieu || getLoanStatus(phieu) !== "dang") return; // chỉ hủy được khi đang mượn
 
-  const sach = currentSachList.find((s) => String(s.id) === String(phieu.sach_id));
-  const docGia = currentDocGiaList.find((d) => String(d.id) === String(phieu.doc_gia_id));
+      const sach = currentSachList.find((s) => String(s.id) === String(phieu.sach_id));
+      const docGia = currentDocGiaList.find((d) => String(d.id) === String(phieu.doc_gia_id));
 
-  pendingCancel = { id: phieu.id };
+      pendingCancel = { id: phieu.id };
 
-  document.getElementById("cancelConfirmDocGia").textContent = docGia?.ho_ten || `#${phieu.doc_gia_id}`;
-  document.getElementById("cancelConfirmSach").textContent = sach?.ten_sach || `Sách #${phieu.sach_id}`;
-  document.getElementById("cancelConfirmDate").textContent = formatDateVn(phieu.ngay_muon);
-  setCancelConfirmError("");
-  document.getElementById("cancelConfirmBackdrop")?.classList.add("show");
-}
+      document.getElementById("cancelConfirmDocGia").textContent = docGia?.ho_ten || `#${phieu.doc_gia_id}`;
+      document.getElementById("cancelConfirmSach").textContent = sach?.ten_sach || `Sách #${phieu.sach_id}`;
+      document.getElementById("cancelConfirmDate").textContent = formatDateVn(phieu.ngay_muon);
+      setCancelConfirmError("");
+      document.getElementById("cancelConfirmBackdrop")?.classList.add("show");
+    }
 
-function closeCancelConfirm() {
-  document.getElementById("cancelConfirmBackdrop")?.classList.remove("show");
-  pendingCancel = null;
-}
+    function closeCancelConfirm() {
+      document.getElementById("cancelConfirmBackdrop")?.classList.remove("show");
+      pendingCancel = null;
+    }
 
-function setCancelConfirmError(message) {
-  const el = document.getElementById("cancelConfirmError");
-  if (!el) return;
-  el.textContent = message;
-  el.classList.toggle("is-hidden", !message);
-}
+    function setCancelConfirmError(message) {
+      const el = document.getElementById("cancelConfirmError");
+      if (!el) return;
+      el.textContent = message;
+      el.classList.toggle("is-hidden", !message);
+    }
 
-async function submitCancelConfirm() {
-  if (!pendingCancel) return;
-  const submitButton = document.getElementById("cancelConfirmSubmit");
-  submitButton.disabled = true;
-  submitButton.textContent = "Đang xử lý...";
-  setCancelConfirmError("");
+    async function submitCancelConfirm() {
+      if (!pendingCancel) return;
+      const submitButton = document.getElementById("cancelConfirmSubmit");
+      submitButton.disabled = true;
+      submitButton.textContent = "Đang xử lý...";
+      setCancelConfirmError("");
 
-  try {
-    await fetchJson(`/phieu-muon/${pendingCancel.id}`, {
-      method: "PUT",
-      body: { trang_thai: "Đã hủy" },
-    });
+      try {
+        await fetchJson(`/phieu-muon/${pendingCancel.id}`, {
+          method: "PUT",
+          body: { trang_thai: "Đã hủy" },
+        });
 
-    closeCancelConfirm();
-    await Promise.all([loadPhieuMuonList(), loadSachList()]);
-    renderLoanBookTable();
-    renderLoanHistory();
-    showToast("Đã hủy phiếu mượn. Sách đã trở lại danh sách cho mượn.");
-  } catch (error) {
-    console.error("Loi huy phieu muon:", error);
-    setCancelConfirmError(toFriendlyMessage(error));
-  } finally {
-    submitButton.disabled = false;
-    submitButton.textContent = "Xác nhận hủy";
-  }
-}
+        closeCancelConfirm();
+        await Promise.all([loadPhieuMuonList(), loadSachList()]);
+        renderLoanBookTable();
+        renderLoanHistory();
+        showToast("Đã hủy phiếu mượn. Sách đã trở lại danh sách cho mượn.");
+      } catch (error) {
+        console.error("Loi huy phieu muon:", error);
+        setCancelConfirmError(toFriendlyMessage(error));
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Xác nhận hủy";
+      }
+    }
 
-</script>
-<div class="book-modal-backdrop" id="bookModalBackdrop">
-  <div class="book-modal" role="dialog" aria-modal="true">
-    <button type="button" class="book-modal__close" id="bookModalClose" aria-label="Dong">&times;</button>
-    <div class="book-modal__cover" id="bookModalCover"></div>
-    <h3 id="bookModalTitle"></h3>
-    <div class="book-modal__row"><span>Tac gia</span><span id="bookModalAuthor"></span></div>
-    <div class="book-modal__row"><span>The loai</span><span id="bookModalGenre"></span></div>
-    <div class="book-modal__row"><span>Nam xuat ban</span><span id="bookModalYear"></span></div>
-    <div class="book-modal__row"><span>So luong</span><span id="bookModalQty"></span></div>
-    <div class="book-modal__row"><span>Trang thai</span><span id="bookModalStatus"></span></div>
-  </div>
-</div>
-
-<!-- Bước 2: popup xác nhận mượn sách -->
-<div class="book-modal-backdrop" id="loanConfirmBackdrop">
-  <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true">
-    <button type="button" class="book-modal__close" id="loanConfirmClose" aria-label="Đóng">&times;</button>
-    <h3>Xác nhận mượn sách</h3>
-    <div class="book-modal__row"><span>Độc giả</span><span id="loanConfirmDocGia"></span></div>
-    <div class="book-modal__row"><span>Sách</span><span id="loanConfirmSach"></span></div>
-    <div class="book-modal__row"><span>Ngày mượn</span><span id="loanConfirmDate"></span></div>
-    <p class="loan-confirm__error is-hidden" id="loanConfirmError"></p>
-    <div class="loan-confirm__actions">
-      <button type="button" class="btn-ghost" id="loanConfirmCancel">Không mượn</button>
-      <button type="button" class="btn-primary" id="loanConfirmSubmit">Xác nhận mượn</button>
+  </script>
+  <div class="book-modal-backdrop" id="bookModalBackdrop">
+    <div class="book-modal" role="dialog" aria-modal="true">
+      <button type="button" class="book-modal__close" id="bookModalClose" aria-label="Dong">&times;</button>
+      <div class="book-modal__cover" id="bookModalCover"></div>
+      <h3 id="bookModalTitle"></h3>
+      <div class="book-modal__row"><span>Tac gia</span><span id="bookModalAuthor"></span></div>
+      <div class="book-modal__row"><span>The loai</span><span id="bookModalGenre"></span></div>
+      <div class="book-modal__row"><span>Nam xuat ban</span><span id="bookModalYear"></span></div>
+      <div class="book-modal__row"><span>So luong</span><span id="bookModalQty"></span></div>
+      <div class="book-modal__row"><span>Trang thai</span><span id="bookModalStatus"></span></div>
     </div>
   </div>
-</div>
 
-<!-- Bước 3: modal thông báo đã mượn thành công -->
-<div class="book-modal-backdrop" id="loanSuccessBackdrop">
-  <div class="book-modal loan-success-modal" role="dialog" aria-modal="true">
-    <button type="button" class="book-modal__close" id="loanSuccessClose" aria-label="Đóng">&times;</button>
-    <div class="loan-success__icon">✅</div>
-    <h3>Đã mượn thành công</h3>
-    <p class="loan-success__desc" id="loanSuccessDesc"></p>
-    <button type="button" class="btn-primary loan-success__ok" id="loanSuccessOk">Đóng</button>
-  </div>
-</div>
-
-<!-- Popup xác nhận hủy mượn -->
-<div class="book-modal-backdrop" id="cancelConfirmBackdrop">
-  <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true">
-    <button type="button" class="book-modal__close" id="cancelConfirmClose" aria-label="Đóng">&times;</button>
-    <h3>Xác nhận hủy mượn</h3>
-    <div class="book-modal__row"><span>Độc giả</span><span id="cancelConfirmDocGia"></span></div>
-    <div class="book-modal__row"><span>Sách</span><span id="cancelConfirmSach"></span></div>
-    <div class="book-modal__row"><span>Ngày mượn</span><span id="cancelConfirmDate"></span></div>
-    <p class="loan-confirm__error is-hidden" id="cancelConfirmError"></p>
-    <div class="loan-confirm__actions">
-      <button type="button" class="btn-ghost" id="cancelConfirmCancel">Không hủy</button>
-      <button type="button" class="btn-danger" id="cancelConfirmSubmit">Xác nhận hủy</button>
-    </div>
-  </div>
-</div>
-<!-- Popup Form Thêm/Sửa Sách -->
-<div class="book-modal-backdrop" id="bookFormBackdrop">
-  <div class="book-modal" role="dialog" aria-modal="true" style="max-width: 500px;">
-    <button type="button" class="book-modal__close" id="bookFormClose" aria-label="Đóng">&times;</button>
-    <h3 id="bookFormTitle">Thêm sách mới</h3>
-    <form id="bookForm" style="margin-top: 16px;">
-      <input type="hidden" id="bookFormId" />
-      <label class="auth-field">
-        <span>Tên sách</span>
-        <input type="text" id="bookFormName" required />
-      </label>
-      <label class="auth-field">
-        <span>Tác giả</span>
-        <input type="text" id="bookFormAuthor" required />
-      </label>
-      <div style="display: flex; gap: 12px;">
-        <label class="auth-field" style="flex: 1;">
-          <span>Thể loại</span>
-          <input type="text" id="bookFormGenre" required />
-        </label>
-        <label class="auth-field" style="flex: 1;">
-          <span>Năm xuất bản</span>
-          <input type="number" id="bookFormYear" required min="1000" max="2100" />
-        </label>
-        <label class="auth-field" style="width: 80px;">
-          <span>Số lượng</span>
-          <input type="number" id="bookFormQty" required min="0" />
-        </label>
+  <!-- Bước 2: popup xác nhận mượn sách -->
+  <div class="book-modal-backdrop" id="loanConfirmBackdrop">
+    <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true">
+      <button type="button" class="book-modal__close" id="loanConfirmClose" aria-label="Đóng">&times;</button>
+      <h3>Xác nhận mượn sách</h3>
+      <div class="book-modal__row"><span>Độc giả</span><span id="loanConfirmDocGia"></span></div>
+      <div class="book-modal__row"><span>Sách</span><span id="loanConfirmSach"></span></div>
+      <div class="book-modal__row"><span>Ngày mượn</span><span id="loanConfirmDate"></span></div>
+      <p class="loan-confirm__error is-hidden" id="loanConfirmError"></p>
+      <div class="loan-confirm__actions">
+        <button type="button" class="btn-ghost" id="loanConfirmCancel">Không mượn</button>
+        <button type="button" class="btn-primary" id="loanConfirmSubmit">Xác nhận mượn</button>
       </div>
-      <label class="auth-field" style="margin-bottom: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <span style="margin-bottom: 0;">Ảnh minh họa (Base64 hoặc URL)</span>
-          <button type="button" class="btn-ghost" id="bookFormAutoFetchBtn" style="padding: 2px 8px; font-size: 11px;">Tự động tìm ảnh bìa</button>
+    </div>
+  </div>
+
+  <!-- Bước 3: modal thông báo đã mượn thành công -->
+  <div class="book-modal-backdrop" id="loanSuccessBackdrop">
+    <div class="book-modal loan-success-modal" role="dialog" aria-modal="true">
+      <button type="button" class="book-modal__close" id="loanSuccessClose" aria-label="Đóng">&times;</button>
+      <div class="loan-success__icon">✅</div>
+      <h3>Đã mượn thành công</h3>
+      <p class="loan-success__desc" id="loanSuccessDesc"></p>
+      <button type="button" class="btn-primary loan-success__ok" id="loanSuccessOk">Đóng</button>
+    </div>
+  </div>
+
+  <!-- Popup xác nhận hủy mượn -->
+  <div class="book-modal-backdrop" id="cancelConfirmBackdrop">
+    <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true">
+      <button type="button" class="book-modal__close" id="cancelConfirmClose" aria-label="Đóng">&times;</button>
+      <h3>Xác nhận hủy mượn</h3>
+      <div class="book-modal__row"><span>Độc giả</span><span id="cancelConfirmDocGia"></span></div>
+      <div class="book-modal__row"><span>Sách</span><span id="cancelConfirmSach"></span></div>
+      <div class="book-modal__row"><span>Ngày mượn</span><span id="cancelConfirmDate"></span></div>
+      <p class="loan-confirm__error is-hidden" id="cancelConfirmError"></p>
+      <div class="loan-confirm__actions">
+        <button type="button" class="btn-ghost" id="cancelConfirmCancel">Không hủy</button>
+        <button type="button" class="btn-danger" id="cancelConfirmSubmit">Xác nhận hủy</button>
+      </div>
+    </div>
+  </div>
+  <!-- Popup Form Thêm/Sửa Sách -->
+  <div class="book-modal-backdrop" id="bookFormBackdrop">
+    <div class="book-modal" role="dialog" aria-modal="true" style="max-width: 500px;">
+      <button type="button" class="book-modal__close" id="bookFormClose" aria-label="Đóng">&times;</button>
+      <h3 id="bookFormTitle">Thêm sách mới</h3>
+      <form id="bookForm" style="margin-top: 16px;">
+        <input type="hidden" id="bookFormId" />
+        <label class="auth-field">
+          <span>Tên sách</span>
+          <input type="text" id="bookFormName" required />
+        </label>
+        <label class="auth-field">
+          <span>Tác giả</span>
+          <input type="text" id="bookFormAuthor" required />
+        </label>
+        <div style="display: flex; gap: 12px;">
+          <label class="auth-field" style="flex: 1;">
+            <span>Thể loại</span>
+            <input type="text" id="bookFormGenre" required />
+          </label>
+          <label class="auth-field" style="flex: 1;">
+            <span>Năm xuất bản</span>
+            <input type="number" id="bookFormYear" required min="1000" max="2100" />
+          </label>
+          <label class="auth-field" style="width: 80px;">
+            <span>Số lượng</span>
+            <input type="number" id="bookFormQty" required min="0" />
+          </label>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <input type="text" id="bookFormImageStr" placeholder="Nhập URL hoặc chuỗi Base64..." style="flex: 1;" />
-          <button type="button" class="btn-ghost" id="bookFormUploadBtn" style="padding: 0 12px;">Tải file</button>
-          <input type="file" id="bookFormFile" accept="image/*" style="display: none;" />
-        </div>
-        <div style="margin-top: 10px; display: flex; gap: 12px; align-items: flex-start;">
-          <div id="bookFormImagePreview" style="width: 60px; height: 80px; background: var(--line-200); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted-500); flex-shrink: 0;">
-            <span>Trống</span>
+        <label class="auth-field" style="margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="margin-bottom: 0;">Ảnh minh họa (Base64 hoặc URL)</span>
+            <button type="button" class="btn-ghost" id="bookFormAutoFetchBtn"
+              style="padding: 2px 8px; font-size: 11px;">Tự động tìm ảnh bìa</button>
           </div>
-          <div class="preset-covers" style="flex: 1;">
-            <span style="display: block; font-size: 11px; color: var(--muted-700); margin-bottom: 4px;">Ảnh bìa mẫu (Click để chọn):</span>
-            <div id="presetCoversContainer" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;">
-              <!-- Javascript will populate this -->
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="bookFormImageStr" placeholder="Nhập URL hoặc chuỗi Base64..." style="flex: 1;" />
+            <button type="button" class="btn-ghost" id="bookFormUploadBtn" style="padding: 0 12px;">Tải file</button>
+            <input type="file" id="bookFormFile" accept="image/*" style="display: none;" />
+          </div>
+          <div style="margin-top: 10px; display: flex; gap: 12px; align-items: flex-start;">
+            <div id="bookFormImagePreview"
+              style="width: 60px; height: 80px; background: var(--line-200); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted-500); flex-shrink: 0;">
+              <span>Trống</span>
+            </div>
+            <div class="preset-covers" style="flex: 1;">
+              <span style="display: block; font-size: 11px; color: var(--muted-700); margin-bottom: 4px;">Ảnh bìa mẫu
+                (Click để chọn):</span>
+              <div id="presetCoversContainer" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;">
+                <!-- Javascript will populate this -->
+              </div>
             </div>
           </div>
+        </label>
+        <p class="loan-confirm__error is-hidden" id="bookFormError"></p>
+        <div class="loan-confirm__actions">
+          <button type="button" class="btn-ghost" id="bookFormCancelBtn">Hủy</button>
+          <button type="submit" class="btn-primary" id="bookFormSubmitBtn">Lưu sách</button>
         </div>
-      </label>
-      <p class="loan-confirm__error is-hidden" id="bookFormError"></p>
-      <div class="loan-confirm__actions">
-        <button type="button" class="btn-ghost" id="bookFormCancelBtn">Hủy</button>
-        <button type="submit" class="btn-primary" id="bookFormSubmitBtn">Lưu sách</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Popup xác nhận xóa sách -->
-<div class="book-modal-backdrop" id="deleteConfirmBackdrop">
-  <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true">
-    <button type="button" class="book-modal__close" id="deleteConfirmClose" aria-label="Đóng">&times;</button>
-    <h3>Xác nhận xóa sách</h3>
-    <p style="font-size: 14px; margin: 10px 0 16px;">Bạn có chắc chắn muốn xóa cuốn sách <strong id="deleteConfirmSach"></strong>? Hành động này không thể hoàn tác.</p>
-    <p class="loan-confirm__error is-hidden" id="deleteConfirmError"></p>
-    <div class="loan-confirm__actions">
-      <button type="button" class="btn-ghost" id="deleteConfirmCancel">Hủy</button>
-      <button type="button" class="btn-danger" id="deleteConfirmSubmit">Xóa sách</button>
+      </form>
     </div>
   </div>
-</div>
+
+  <!-- Popup xác nhận xóa sách -->
+  <div class="book-modal-backdrop" id="deleteConfirmBackdrop">
+    <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true">
+      <button type="button" class="book-modal__close" id="deleteConfirmClose" aria-label="Đóng">&times;</button>
+      <h3>Xác nhận xóa sách</h3>
+      <p style="font-size: 14px; margin: 10px 0 16px;">Bạn có chắc chắn muốn xóa cuốn sách <strong
+          id="deleteConfirmSach"></strong>? Hành động này không thể hoàn tác.</p>
+      <p class="loan-confirm__error is-hidden" id="deleteConfirmError"></p>
+      <div class="loan-confirm__actions">
+        <button type="button" class="btn-ghost" id="deleteConfirmCancel">Hủy</button>
+        <button type="button" class="btn-danger" id="deleteConfirmSubmit">Xóa sách</button>
+      </div>
+    </div>
+  </div>
 </body>
+
 </html>
