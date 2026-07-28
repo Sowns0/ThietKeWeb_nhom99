@@ -2705,24 +2705,55 @@
           <td>${escapeHtml(dg.so_dien_thoai || '-')}</td>
           <td>${escapeHtml(dg.email || '-')}</td>
           <td style="text-align: right;">
-            <button class="btn-ghost" onclick="alert('Chức năng sửa ở Bước 3')">Sửa</button>
-            <button class="btn-ghost" style="color:var(--stamp-borrowed)" onclick="alert('Chức năng xóa ở Bước 3')">Xóa</button>
+            <button class="btn-ghost" onclick="openDocGiaForm({ id: ${dg.id}, ho_ten: '${escapeHtml(dg.ho_ten).replace(/'/g, "\\'")}', so_dien_thoai: '${escapeHtml(dg.so_dien_thoai || '')}', email: '${escapeHtml(dg.email || '')}' })">Sửa</button>
+            <button class="btn-ghost" style="color:var(--stamp-borrowed)" onclick="openDocGiaDeleteConfirm(${dg.id}, '${escapeHtml(dg.ho_ten).replace(/'/g, "\\'")}')">Xóa</button>
           </td>
         </tr>
       `).join("");
     }
 
-    /* Thêm Độc giả Logic */
-    function openDocGiaForm() {
-      document.getElementById('docGiaFormName').value = '';
-      document.getElementById('docGiaFormPhone').value = '';
-      document.getElementById('docGiaFormEmail').value = '';
-      document.getElementById('docGiaFormError').classList.add('is-hidden');
+    /* Thêm/Sửa Độc giả Logic */
+    function openDocGiaForm(docGia = null) {
+      const err = document.getElementById('docGiaFormError');
+      const title = document.getElementById('docGiaFormTitle');
+      const btn = document.getElementById('docGiaFormSubmitBtn');
+
+      err.classList.add('is-hidden');
+      err.textContent = "";
+
+      if (docGia) {
+        title.textContent = "Sửa Độc giả";
+        document.getElementById('docGiaFormId').value = docGia.id;
+        document.getElementById('docGiaFormName').value = docGia.ho_ten || "";
+        document.getElementById('docGiaFormPhone').value = docGia.so_dien_thoai || "";
+        document.getElementById('docGiaFormEmail').value = docGia.email || "";
+        btn.textContent = "Lưu thay đổi";
+      } else {
+        title.textContent = "Thêm Độc giả mới";
+        document.getElementById('docGiaFormId').value = "";
+        document.getElementById('docGiaFormName').value = "";
+        document.getElementById('docGiaFormPhone').value = "";
+        document.getElementById('docGiaFormEmail').value = "";
+        btn.textContent = "Thêm độc giả";
+      }
+
       document.getElementById('docGiaFormBackdrop').classList.add('show');
     }
 
     function closeDocGiaForm() {
       document.getElementById('docGiaFormBackdrop').classList.remove('show');
+    }
+
+    // Xóa Độc giả Logic
+    function openDocGiaDeleteConfirm(id, ten) {
+      document.getElementById("docGiaDeleteId").value = id;
+      document.getElementById("docGiaDeleteName").textContent = ten;
+      document.getElementById("docGiaDeleteError").classList.add("is-hidden");
+      document.getElementById("docGiaDeleteBackdrop").classList.add("show");
+    }
+
+    function closeDocGiaDeleteConfirm() {
+      document.getElementById("docGiaDeleteBackdrop").classList.remove("show");
     }
 
     function bindDocGiaEvents() {
@@ -2734,6 +2765,7 @@
         const btn = document.getElementById('docGiaFormSubmitBtn');
         const err = document.getElementById('docGiaFormError');
         
+        const id = document.getElementById('docGiaFormId').value;
         const ho_ten = document.getElementById('docGiaFormName').value.trim();
         const so_dien_thoai = document.getElementById('docGiaFormPhone').value.trim();
         const email = document.getElementById('docGiaFormEmail').value.trim();
@@ -2749,13 +2781,16 @@
           btn.textContent = "Đang xử lý...";
           err.classList.add('is-hidden');
 
-          await fetchJson("/doc-gia", {
-            method: "POST",
+          const url = id ? `/doc-gia/${id}` : "/doc-gia";
+          const method = id ? "PUT" : "POST";
+
+          await fetchJson(url, {
+            method: method,
             body: { ho_ten, so_dien_thoai, email }
           });
 
           closeDocGiaForm();
-          showToast("Đã thêm độc giả thành công");
+          showToast(id ? "Đã cập nhật độc giả" : "Đã thêm độc giả thành công");
           await loadDocGiaList();
           renderDocGiaTable();
         } catch (error) {
@@ -2763,7 +2798,36 @@
           err.classList.remove('is-hidden');
         } finally {
           btn.disabled = false;
-          btn.textContent = "Thêm độc giả";
+          btn.textContent = id ? "Lưu thay đổi" : "Thêm độc giả";
+        }
+      });
+
+      // Xóa form
+      document.getElementById("docGiaDeleteClose").addEventListener("click", closeDocGiaDeleteConfirm);
+      document.getElementById("docGiaDeleteCancel").addEventListener("click", closeDocGiaDeleteConfirm);
+      
+      document.getElementById("docGiaDeleteSubmit").addEventListener("click", async () => {
+        const id = document.getElementById("docGiaDeleteId").value;
+        const btn = document.getElementById("docGiaDeleteSubmit");
+        const err = document.getElementById("docGiaDeleteError");
+
+        try {
+          btn.disabled = true;
+          btn.textContent = "Đang xóa...";
+          err.classList.add("is-hidden");
+
+          await fetchJson(`/doc-gia/${id}`, { method: "DELETE" });
+
+          closeDocGiaDeleteConfirm();
+          showToast("Đã xóa độc giả");
+          await loadDocGiaList();
+          renderDocGiaTable();
+        } catch (error) {
+          err.textContent = toFriendlyMessage(error);
+          err.classList.remove("is-hidden");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Xóa độc giả";
         }
       });
     }
@@ -2905,8 +2969,9 @@
   <div class="book-modal-backdrop" id="docGiaFormBackdrop">
     <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true" style="max-width: 400px;">
       <button type="button" class="book-modal__close" id="docGiaFormClose" aria-label="Đóng">&times;</button>
-      <h3>Thêm độc giả mới</h3>
+      <h3 id="docGiaFormTitle">Thêm độc giả mới</h3>
       <form id="docGiaForm" class="loan-confirm__body" style="margin-top: 16px;">
+        <input type="hidden" id="docGiaFormId" />
         <label class="auth-field" style="margin-bottom: 12px; display: block;">
           <span style="display: block; margin-bottom: 4px;">Họ và tên <span style="color: red;">*</span></span>
           <input type="text" id="docGiaFormName" placeholder="Ví dụ: Nguyễn Văn A" required style="width: 100%; box-sizing: border-box;" />
@@ -2925,6 +2990,21 @@
           <button type="submit" class="btn-primary" id="docGiaFormSubmitBtn">Thêm độc giả</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Popup xác nhận xóa độc giả -->
+  <div class="book-modal-backdrop" id="docGiaDeleteBackdrop">
+    <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true">
+      <button type="button" class="book-modal__close" id="docGiaDeleteClose" aria-label="Đóng">&times;</button>
+      <h3>Xác nhận xóa độc giả</h3>
+      <input type="hidden" id="docGiaDeleteId" />
+      <p style="font-size: 14px; margin: 10px 0 16px;">Bạn có chắc chắn muốn xóa độc giả <strong id="docGiaDeleteName"></strong>? Hành động này không thể hoàn tác.</p>
+      <p class="loan-confirm__error is-hidden" id="docGiaDeleteError"></p>
+      <div class="loan-confirm__actions">
+        <button type="button" class="btn-ghost" id="docGiaDeleteCancel">Hủy</button>
+        <button type="button" class="btn-danger" id="docGiaDeleteSubmit">Xóa độc giả</button>
+      </div>
     </div>
   </div>
 </body>
