@@ -1272,9 +1272,11 @@
 <section class="auth-page" id="loginView">
   <div class="auth-page__visual">
     <a href="#" class="auth-brand">
-      <span class="auth-brand__mark">TV</span>
+      <span class="auth-brand__mark" style="background: transparent; padding: 0;">
+        <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/10/Icon-CTy-Tap-doan-Phuong-Hoan.png" alt="Phenikaa Logo" style="width: 100%; height: 100%; object-fit: contain;" />
+      </span>
       <span>
-        <strong>Thư viện số</strong>
+        <strong>Thư viện số Phenikaa University</strong>
         <small>Library Portal</small>
       </span>
     </a>
@@ -1327,9 +1329,11 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar__head">
       <div class="brand">
-        <div class="brand__mark">TV</div>
+        <div class="brand__mark" style="background: transparent; padding: 0; width: 40px; height: 40px;">
+          <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/10/Icon-CTy-Tap-doan-Phuong-Hoan.png" alt="Phenikaa Logo" style="width: 100%; height: 100%; object-fit: contain;" />
+        </div>
         <div class="brand__text">
-          <strong>Thư viện số</strong>
+          <strong>Thư viện số Phenikaa University</strong>
           <small>Library Portal</small>
         </div>
       </div>
@@ -1530,12 +1534,36 @@
         </div>
       </section>
 
-      <!-- ================= ĐỘC GIẢ (placeholder) ================= -->
+      <!-- ================= ĐỘC GIẢ ================= -->
       <section class="panel is-hidden" id="panelDocGia">
         <div class="panel__head">
-          <h1>Độc giả</h1>
+          <h1>Quản lý Độc giả</h1>
+          <button class="btn-primary" id="docGiaAddBtn" onclick="alert('Chức năng thêm ở Bước 2')">Thêm Độc giả</button>
         </div>
-        <p class="empty-state" style="padding:24px;">Chức năng quản lý độc giả đang được phát triển.</p>
+        <div class="filter-row">
+          <div class="field grow">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="docGiaSearchInput" placeholder="Tìm độc giả theo tên, sđt, email..." oninput="renderDocGiaTable()" />
+          </div>
+        </div>
+        <div class="loan-layout" style="padding-top: 0;">
+          <div class="loan-table-wrap" style="width: 100%;">
+            <table class="loan-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Họ tên</th>
+                  <th>Số điện thoại</th>
+                  <th>Email</th>
+                  <th style="width: 130px; text-align: right;">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="docGiaTableBody">
+                <tr><td colspan="5" class="empty-state">Đang tải danh sách...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
     </div>
@@ -2259,6 +2287,8 @@
 
       if (view === "phieu-muon") {
         loadPhieuMuonView();
+      } else if (view === "doc-gia") {
+        loadDocGiaView();
       }
     }
 
@@ -2620,6 +2650,56 @@
       }
     }
 
+    /* ========================================================================
+       QUẢN LÝ ĐỘC GIẢ
+       ======================================================================== */
+    async function loadDocGiaView() {
+      const tableBody = document.getElementById("docGiaTableBody");
+      try {
+        if (!currentDocGiaList || currentDocGiaList.length === 0) {
+          await loadDocGiaList();
+        }
+        renderDocGiaTable();
+      } catch (error) {
+        console.error("Loi tai du lieu doc gia:", error);
+        if (tableBody) tableBody.innerHTML = `<tr><td colspan="5" class="empty-state">${escapeHtml(toFriendlyMessage(error))}</td></tr>`;
+        showToast(toFriendlyMessage(error));
+      }
+    }
+
+    function renderDocGiaTable() {
+      const tbody = document.getElementById("docGiaTableBody");
+      const searchInput = document.getElementById("docGiaSearchInput");
+      if (!tbody) return;
+
+      let filteredList = currentDocGiaList || [];
+      if (searchInput && searchInput.value) {
+        const query = searchInput.value.toLowerCase();
+        filteredList = filteredList.filter(dg => 
+          (dg.ho_ten && dg.ho_ten.toLowerCase().includes(query)) ||
+          (dg.so_dien_thoai && dg.so_dien_thoai.includes(query)) ||
+          (dg.email && dg.email.toLowerCase().includes(query))
+        );
+      }
+
+      if (filteredList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Không tìm thấy độc giả nào.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filteredList.map(dg => `
+        <tr>
+          <td><strong>#${dg.id}</strong></td>
+          <td>${escapeHtml(dg.ho_ten)}</td>
+          <td>${escapeHtml(dg.so_dien_thoai || '-')}</td>
+          <td>${escapeHtml(dg.email || '-')}</td>
+          <td style="text-align: right;">
+            <button class="btn-ghost" onclick="alert('Chức năng sửa ở Bước 3')">Sửa</button>
+            <button class="btn-ghost" style="color:var(--stamp-borrowed)" onclick="alert('Chức năng xóa ở Bước 3')">Xóa</button>
+          </td>
+        </tr>
+      `).join("");
+    }
   </script>
   <div class="book-modal-backdrop" id="bookModalBackdrop">
     <div class="book-modal" role="dialog" aria-modal="true">
