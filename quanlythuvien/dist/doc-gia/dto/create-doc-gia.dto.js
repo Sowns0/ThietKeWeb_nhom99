@@ -15,6 +15,11 @@ class CreateDocGiaDto {
     ho_ten;
     email;
     so_dien_thoai;
+    ma_doc_gia;
+    ngay_sinh;
+    avatar_url;
+    trang_thai;
+    loai_doc_gia;
 }
 exports.CreateDocGiaDto = CreateDocGiaDto;
 __decorate([
@@ -32,4 +37,29 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateDocGiaDto.prototype, "so_dien_thoai", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDocGiaDto.prototype, "ma_doc_gia", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDocGiaDto.prototype, "ngay_sinh", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDocGiaDto.prototype, "avatar_url", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDocGiaDto.prototype, "trang_thai", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDocGiaDto.prototype, "loai_doc_gia", void 0);
 //# sourceMappingURL=create-doc-gia.dto.js.map
