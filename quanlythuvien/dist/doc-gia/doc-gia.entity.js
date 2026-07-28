@@ -16,6 +16,11 @@ let DocGia = class DocGia {
     ho_ten;
     email;
     so_dien_thoai;
+    ma_doc_gia;
+    ngay_sinh;
+    avatar_url;
+    trang_thai;
+    loai_doc_gia;
 };
 exports.DocGia = DocGia;
 __decorate([
@@ -34,6 +39,26 @@ __decorate([
     (0, typeorm_1.Column)({ name: 'so_dien_thoai', nullable: true }),
     __metadata("design:type", String)
 ], DocGia.prototype, "so_dien_thoai", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], DocGia.prototype, "ma_doc_gia", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], DocGia.prototype, "ngay_sinh", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], DocGia.prototype, "avatar_url", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 'ACTIVE' }),
+    __metadata("design:type", String)
+], DocGia.prototype, "trang_thai", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 'SINH_VIEN' }),
+    __metadata("design:type", String)
+], DocGia.prototype, "loai_doc_gia", void 0);
 exports.DocGia = DocGia = __decorate([
     (0, typeorm_1.Entity)('doc_gia')
 ], DocGia);

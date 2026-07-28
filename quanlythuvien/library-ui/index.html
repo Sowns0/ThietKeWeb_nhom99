@@ -1550,19 +1550,31 @@
               <circle cx="11" cy="11" r="7" />
               <path d="m21 21-4.3-4.3" />
             </svg>
-            <input type="text" id="docGiaSearchInput" placeholder="Tìm độc giả theo tên, sđt, email..."
+            <input type="text" id="docGiaSearchInput" placeholder="Tìm độc giả theo tên, mã số, sđt, email..."
               oninput="renderDocGiaTable()" />
           </div>
+          <select id="docGiaFilterType" onchange="renderDocGiaTable()" style="padding: 0 12px; border: 1px solid var(--line-200); border-radius: 8px; outline: none; font-family: inherit;">
+            <option value="">Tất cả phân loại</option>
+            <option value="SINH_VIEN">Sinh viên</option>
+            <option value="GIANG_VIEN">Giảng viên</option>
+            <option value="KHACH">Khách</option>
+          </select>
+          <select id="docGiaFilterStatus" onchange="renderDocGiaTable()" style="padding: 0 12px; border: 1px solid var(--line-200); border-radius: 8px; outline: none; font-family: inherit;">
+            <option value="">Tất cả trạng thái</option>
+            <option value="ACTIVE">Hoạt động</option>
+            <option value="LOCKED">Đã khóa</option>
+          </select>
         </div>
         <div class="loan-layout" style="padding-top: 0;">
           <div class="loan-table-wrap" style="width: 100%;">
             <table class="loan-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Họ tên</th>
-                  <th>Số điện thoại</th>
-                  <th>Email</th>
+                  <th>Độc giả</th>
+                  <th>Phân loại</th>
+                  <th>Liên hệ</th>
+                  <th style="width: 100px;">Trạng thái</th>
+                  <th style="width: 100px;">Đang mượn</th>
                   <th style="width: 130px; text-align: right;">Thao tác</th>
                 </tr>
               </thead>
@@ -2667,8 +2679,13 @@
     async function loadDocGiaView() {
       const tableBody = document.getElementById("docGiaTableBody");
       try {
-        if (!currentDocGiaList || currentDocGiaList.length === 0) {
-          await loadDocGiaList();
+        const tasks = [];
+        if (!currentDocGiaList || currentDocGiaList.length === 0) tasks.push(loadDocGiaList());
+        if (!currentPhieuMuonList || currentPhieuMuonList.length === 0) tasks.push(loadPhieuMuonList());
+        if (!currentSachList || currentSachList.length === 0) tasks.push(loadSachList());
+        
+        if (tasks.length > 0) {
+          await Promise.all(tasks);
         }
         renderDocGiaTable();
       } catch (error) {
@@ -2681,39 +2698,74 @@
     function renderDocGiaTable() {
       const tbody = document.getElementById("docGiaTableBody");
       const searchInput = document.getElementById("docGiaSearchInput");
+      const filterType = document.getElementById("docGiaFilterType");
+      const filterStatus = document.getElementById("docGiaFilterStatus");
       if (!tbody) return;
 
       let filteredList = currentDocGiaList || [];
+      
+      if (filterType && filterType.value) {
+        filteredList = filteredList.filter(dg => dg.loai_doc_gia === filterType.value);
+      }
+      if (filterStatus && filterStatus.value) {
+        filteredList = filteredList.filter(dg => dg.trang_thai === filterStatus.value);
+      }
       if (searchInput && searchInput.value) {
         const query = searchInput.value.toLowerCase();
         filteredList = filteredList.filter(dg =>
           (dg.ho_ten && dg.ho_ten.toLowerCase().includes(query)) ||
           (dg.so_dien_thoai && dg.so_dien_thoai.includes(query)) ||
-          (dg.email && dg.email.toLowerCase().includes(query))
+          (dg.email && dg.email.toLowerCase().includes(query)) ||
+          (dg.ma_doc_gia && dg.ma_doc_gia.toLowerCase().includes(query))
         );
       }
 
       if (filteredList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Không tìm thấy độc giả nào.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Không tìm thấy độc giả nào.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = filteredList.map(dg => `
+      tbody.innerHTML = filteredList.map(dg => {
+        let borrowedCount = 0;
+        if (currentPhieuMuonList) {
+          borrowedCount = currentPhieuMuonList.filter(p => p.doc_gia_id === dg.id && getLoanStatus(p) === 'dang').length;
+        }
+        const badgeColor = borrowedCount > 0 ? 'background: var(--blue-100); color: var(--blue-700); font-weight: bold;' : 'background: var(--line-100); color: var(--muted-700);';
+        const typeLabel = dg.loai_doc_gia === 'SINH_VIEN' ? 'Sinh viên' : (dg.loai_doc_gia === 'GIANG_VIEN' ? 'Giảng viên' : 'Khách');
+        const statusLabel = dg.trang_thai === 'LOCKED' ? '<span class="status-badge" style="background: var(--red-100); color: var(--red-700);">Bị khóa</span>' : '<span class="status-badge" style="background: var(--green-100); color: var(--green-700);">Hoạt động</span>';
+        const docGiaStr = btoa(encodeURIComponent(JSON.stringify(dg)));
+        
+        return `
         <tr>
-          <td><strong>#${dg.id}</strong></td>
-          <td>${escapeHtml(dg.ho_ten)}</td>
-          <td>${escapeHtml(dg.so_dien_thoai || '-')}</td>
-          <td>${escapeHtml(dg.email || '-')}</td>
-          <td style="text-align: right;">
-            <button class="btn-ghost" onclick="openDocGiaForm({ id: ${dg.id}, ho_ten: '${escapeHtml(dg.ho_ten).replace(/'/g, "\\'")}', so_dien_thoai: '${escapeHtml(dg.so_dien_thoai || '')}', email: '${escapeHtml(dg.email || '')}' })">Sửa</button>
+          <td>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <img src="${escapeHtml(dg.avatar_url) || 'https://placehold.co/100x100/131B33/ffffff?text=Avatar'}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line-200);" />
+              <div>
+                <strong style="color: var(--text-100); display: block; font-size: 14px;">${escapeHtml(dg.ho_ten)}</strong>
+                <span style="color: var(--muted-500); font-size: 12px;">ID: #${dg.id} ${dg.ma_doc_gia ? ' - ' + escapeHtml(dg.ma_doc_gia) : ''}</span>
+              </div>
+            </div>
+          </td>
+          <td>${typeLabel}</td>
+          <td>
+            <div style="font-size: 13px;">
+              <div style="color: var(--text-100);">${escapeHtml(dg.so_dien_thoai || '-')}</div>
+              <div style="color: var(--muted-500);">${escapeHtml(dg.email || '-')}</div>
+            </div>
+          </td>
+          <td>${statusLabel}</td>
+          <td><span class="status-badge" style="${badgeColor}">${borrowedCount} cuốn</span></td>
+          <td style="text-align: right; white-space: nowrap;">
+            <button class="btn-ghost" onclick="openDocGiaProfile('${docGiaStr}')" style="color: var(--blue-700)">Hồ sơ</button>
+            <button class="btn-ghost" onclick="openDocGiaForm('${docGiaStr}')">Sửa</button>
             <button class="btn-ghost" style="color:var(--stamp-borrowed)" onclick="openDocGiaDeleteConfirm(${dg.id}, '${escapeHtml(dg.ho_ten).replace(/'/g, "\\'")}')">Xóa</button>
           </td>
         </tr>
-      `).join("");
+      `}).join("");
     }
 
     /* Thêm/Sửa Độc giả Logic */
-    function openDocGiaForm(docGia = null) {
+    function openDocGiaForm(docGiaStr = null) {
       const err = document.getElementById('docGiaFormError');
       const title = document.getElementById('docGiaFormTitle');
       const btn = document.getElementById('docGiaFormSubmitBtn');
@@ -2721,12 +2773,17 @@
       err.classList.add('is-hidden');
       err.textContent = "";
 
-      if (docGia) {
+      if (docGiaStr) {
+        const docGia = JSON.parse(decodeURIComponent(atob(docGiaStr)));
         title.textContent = "Sửa Độc giả";
         document.getElementById('docGiaFormId').value = docGia.id;
         document.getElementById('docGiaFormName').value = docGia.ho_ten || "";
         document.getElementById('docGiaFormPhone').value = docGia.so_dien_thoai || "";
         document.getElementById('docGiaFormEmail').value = docGia.email || "";
+        document.getElementById('docGiaFormMa').value = docGia.ma_doc_gia || "";
+        document.getElementById('docGiaFormDob').value = docGia.ngay_sinh || "";
+        document.getElementById('docGiaFormType').value = docGia.loai_doc_gia || "SINH_VIEN";
+        document.getElementById('docGiaFormAvatar').value = docGia.avatar_url || "";
         btn.textContent = "Lưu thay đổi";
       } else {
         title.textContent = "Thêm Độc giả mới";
@@ -2734,6 +2791,10 @@
         document.getElementById('docGiaFormName').value = "";
         document.getElementById('docGiaFormPhone').value = "";
         document.getElementById('docGiaFormEmail').value = "";
+        document.getElementById('docGiaFormMa').value = "";
+        document.getElementById('docGiaFormDob').value = "";
+        document.getElementById('docGiaFormType').value = "SINH_VIEN";
+        document.getElementById('docGiaFormAvatar').value = "";
         btn.textContent = "Thêm độc giả";
       }
 
@@ -2756,6 +2817,108 @@
       document.getElementById("docGiaDeleteBackdrop").classList.remove("show");
     }
 
+    // Hồ sơ Độc giả Logic
+    let currentProfileId = null;
+
+    function openDocGiaProfile(docGiaStr) {
+      const dg = JSON.parse(decodeURIComponent(atob(docGiaStr)));
+      currentProfileId = dg.id;
+      
+      document.getElementById('profileAvatar').src = escapeHtml(dg.avatar_url) || 'https://placehold.co/100x100/131B33/ffffff?text=Avatar';
+      document.getElementById('profileName').textContent = escapeHtml(dg.ho_ten);
+      
+      const typeLabel = dg.loai_doc_gia === 'SINH_VIEN' ? 'Sinh viên' : (dg.loai_doc_gia === 'GIANG_VIEN' ? 'Giảng viên' : 'Khách');
+      const maLabel = dg.ma_doc_gia ? escapeHtml(dg.ma_doc_gia) : 'Chưa có ID';
+      document.getElementById('profileMeta').textContent = `${typeLabel} • ${maLabel} • ${escapeHtml(dg.so_dien_thoai || 'Chưa có SĐT')} • ${escapeHtml(dg.email || 'Chưa có Email')}`;
+      
+      const btnLock = document.getElementById('profileToggleLockBtn');
+      if (dg.trang_thai === 'LOCKED') {
+        btnLock.textContent = "Mở khóa thẻ";
+        btnLock.className = "btn-primary";
+        btnLock.onclick = () => toggleDocGiaStatus(dg.id, 'ACTIVE');
+      } else {
+        btnLock.textContent = "Khóa thẻ (Vô hiệu hóa)";
+        btnLock.className = "btn-danger";
+        btnLock.onclick = () => toggleDocGiaStatus(dg.id, 'LOCKED');
+      }
+
+      // Render Lịch sử mượn
+      const loanHistoryBody = document.getElementById('profileLoanHistoryBody');
+      const userLoans = currentPhieuMuonList ? currentPhieuMuonList.filter(p => p.doc_gia_id === dg.id) : [];
+      
+      if (userLoans.length === 0) {
+        loanHistoryBody.innerHTML = `<tr><td colspan="4" class="empty-state">Chưa mượn cuốn sách nào</td></tr>`;
+      } else {
+        // Sắp xếp: phiếu đang mượn lên trước, sau đó mới đến đã trả
+        userLoans.sort((a, b) => {
+          const statusA = getLoanStatus(a);
+          const statusB = getLoanStatus(b);
+          if (statusA === statusB) return new Date(b.ngay_muon) - new Date(a.ngay_muon);
+          return statusA === 'dang' ? -1 : 1;
+        });
+
+        loanHistoryBody.innerHTML = userLoans.map(p => {
+          const status = getLoanStatus(p);
+          const ngayMuon = new Date(p.ngay_muon).toLocaleDateString('vi-VN');
+          
+          // Giả định hạn trả là 14 ngày sau khi mượn
+          const borrowDateObj = new Date(p.ngay_muon);
+          const dueDateObj = new Date(borrowDateObj);
+          dueDateObj.setDate(dueDateObj.getDate() + 14);
+          const ngayHan = dueDateObj.toLocaleDateString('vi-VN');
+          
+          let isQuahan = false;
+          if (status === 'dang') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const returnDateOnly = new Date(dueDateObj);
+            returnDateOnly.setHours(0, 0, 0, 0);
+            isQuahan = today > returnDateOnly;
+          }
+          const trangThaiStr = status === 'dang' 
+            ? (isQuahan ? '<span style="color:var(--red-700); font-weight:bold;">Quá hạn</span>' : '<span style="color:var(--blue-700); font-weight:bold;">Đang mượn</span>') 
+            : (status === 'huy' ? '<span style="color:var(--muted-500);">Đã hủy</span>' : '<span style="color:var(--green-700);">Đã trả</span>');
+          
+          const tenSach = currentSachList.find(s => String(s.id) === String(p.sach_id))?.ten_sach || 'Sách bị xóa';
+          return `
+            <tr style="${isQuahan ? 'background: #fee2e2;' : ''}">
+              <td><strong>${escapeHtml(tenSach)}</strong></td>
+              <td>${ngayMuon}</td>
+              <td>${ngayHan}</td>
+              <td>${trangThaiStr}</td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      document.getElementById('docGiaProfileBackdrop').classList.add('show');
+    }
+
+    function closeDocGiaProfile() {
+      document.getElementById('docGiaProfileBackdrop').classList.remove('show');
+      currentProfileId = null;
+    }
+
+    async function toggleDocGiaStatus(id, newStatus) {
+      if (!confirm(`Bạn có chắc muốn ${newStatus === 'LOCKED' ? 'khóa' : 'mở khóa'} thẻ này?`)) return;
+      try {
+        await fetchJson(`/doc-gia/${id}`, {
+          method: "PUT",
+          body: { trang_thai: newStatus }
+        });
+        showToast("Đã cập nhật trạng thái thẻ");
+        await loadDocGiaList();
+        renderDocGiaTable();
+        
+        const updatedDg = currentDocGiaList.find(d => d.id === id);
+        if (updatedDg && currentProfileId === id) {
+           openDocGiaProfile(btoa(encodeURIComponent(JSON.stringify(updatedDg))));
+        }
+      } catch (error) {
+        showToast(toFriendlyMessage(error));
+      }
+    }
+
     function bindDocGiaEvents() {
       document.getElementById('docGiaFormClose').addEventListener('click', closeDocGiaForm);
       document.getElementById('docGiaFormCancelBtn').addEventListener('click', closeDocGiaForm);
@@ -2769,6 +2932,10 @@
         const ho_ten = document.getElementById('docGiaFormName').value.trim();
         const so_dien_thoai = document.getElementById('docGiaFormPhone').value.trim();
         const email = document.getElementById('docGiaFormEmail').value.trim();
+        const ma_doc_gia = document.getElementById('docGiaFormMa').value.trim();
+        const ngay_sinh = document.getElementById('docGiaFormDob').value;
+        const loai_doc_gia = document.getElementById('docGiaFormType').value;
+        const avatar_url = document.getElementById('docGiaFormAvatar').value.trim();
 
         if (!ho_ten) {
           err.textContent = "Vui lòng nhập họ tên";
@@ -2786,7 +2953,7 @@
 
           await fetchJson(url, {
             method: method,
-            body: { ho_ten, so_dien_thoai, email }
+            body: { ho_ten, so_dien_thoai, email, ma_doc_gia, ngay_sinh, loai_doc_gia, avatar_url }
           });
 
           closeDocGiaForm();
@@ -2976,13 +3143,37 @@
           <span style="display: block; margin-bottom: 4px;">Họ và tên <span style="color: red;">*</span></span>
           <input type="text" id="docGiaFormName" placeholder="Ví dụ: Nguyễn Văn A" required style="width: 100%; box-sizing: border-box;" />
         </label>
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <label class="auth-field" style="flex: 1; display: block;">
+            <span style="display: block; margin-bottom: 4px;">Mã Độc giả / CCCD</span>
+            <input type="text" id="docGiaFormMa" placeholder="Ví dụ: 20010101" style="width: 100%; box-sizing: border-box;" />
+          </label>
+          <label class="auth-field" style="flex: 1; display: block;">
+            <span style="display: block; margin-bottom: 4px;">Ngày sinh</span>
+            <input type="date" id="docGiaFormDob" style="width: 100%; box-sizing: border-box;" />
+          </label>
+        </div>
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <label class="auth-field" style="flex: 1; display: block;">
+            <span style="display: block; margin-bottom: 4px;">Số điện thoại</span>
+            <input type="tel" id="docGiaFormPhone" placeholder="Ví dụ: 0987654321" style="width: 100%; box-sizing: border-box;" />
+          </label>
+          <label class="auth-field" style="flex: 1; display: block;">
+            <span style="display: block; margin-bottom: 4px;">Email</span>
+            <input type="email" id="docGiaFormEmail" placeholder="Ví dụ: anv@phenikaa-uni.edu.vn" style="width: 100%; box-sizing: border-box;" />
+          </label>
+        </div>
         <label class="auth-field" style="margin-bottom: 12px; display: block;">
-          <span style="display: block; margin-bottom: 4px;">Số điện thoại</span>
-          <input type="tel" id="docGiaFormPhone" placeholder="Ví dụ: 0987654321" style="width: 100%; box-sizing: border-box;" />
+          <span style="display: block; margin-bottom: 4px;">Loại độc giả</span>
+          <select id="docGiaFormType" style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid var(--line-200); background: var(--surface-100); color: var(--text-100);">
+            <option value="SINH_VIEN">Sinh viên</option>
+            <option value="GIANG_VIEN">Giảng viên</option>
+            <option value="KHACH">Khách</option>
+          </select>
         </label>
         <label class="auth-field" style="margin-bottom: 12px; display: block;">
-          <span style="display: block; margin-bottom: 4px;">Email</span>
-          <input type="email" id="docGiaFormEmail" placeholder="Ví dụ: anv@phenikaa-uni.edu.vn" style="width: 100%; box-sizing: border-box;" />
+          <span style="display: block; margin-bottom: 4px;">URL Ảnh đại diện (Avatar)</span>
+          <input type="text" id="docGiaFormAvatar" placeholder="https://..." style="width: 100%; box-sizing: border-box;" />
         </label>
         <p class="loan-confirm__error is-hidden" id="docGiaFormError"></p>
         <div class="loan-confirm__actions" style="margin-top: 20px;">
@@ -3004,6 +3195,44 @@
       <div class="loan-confirm__actions">
         <button type="button" class="btn-ghost" id="docGiaDeleteCancel">Hủy</button>
         <button type="button" class="btn-danger" id="docGiaDeleteSubmit">Xóa độc giả</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup Hồ sơ Độc giả -->
+  <div class="book-modal-backdrop" id="docGiaProfileBackdrop">
+    <div class="book-modal" role="dialog" aria-modal="true" style="max-width: 600px;">
+      <button type="button" class="book-modal__close" onclick="closeDocGiaProfile()" aria-label="Đóng">&times;</button>
+      <h3 style="margin-bottom: 20px;">Hồ sơ Độc giả</h3>
+      
+      <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 24px;">
+        <img id="profileAvatar" src="" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--line-200);" />
+        <div style="flex: 1;">
+          <h2 id="profileName" style="font-size: 20px; color: var(--text-100); margin: 0 0 4px 0;"></h2>
+          <p id="profileMeta" style="color: var(--muted-500); font-size: 14px; margin: 0 0 12px 0;"></p>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-primary" id="profileToggleLockBtn" style="padding: 6px 12px; font-size: 13px;"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="loan-layout" style="padding: 0; box-shadow: none;">
+        <h4 style="margin: 0 0 10px 0; font-size: 16px;">Lịch sử Mượn / Trả sách</h4>
+        <div class="loan-table-wrap" style="max-height: 250px; overflow-y: auto;">
+          <table class="loan-table">
+            <thead>
+              <tr>
+                <th>Sách</th>
+                <th>Ngày mượn</th>
+                <th>Tới hạn</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody id="profileLoanHistoryBody">
+              <!-- Rows inserted by JS -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
