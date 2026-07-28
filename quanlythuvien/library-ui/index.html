@@ -1052,15 +1052,12 @@ function bindBookModalEvents() {
   document.getElementById("bookFormAutoFetchBtn")?.addEventListener("click", () => {
     const title = document.getElementById("bookFormName")?.value.trim();
     if (!title) {
-      showToast("Vui lòng nhập Tên sách trước khi tự động tìm ảnh.");
+      showToast("Vui lòng nhập Tên sách trước khi tìm ảnh.");
       return;
     }
     const keyword = encodeURIComponent(title);
-    // Sử dụng AI tạo ảnh miễn phí (Pollinations AI) để hỗ trợ tốt tiếng Việt
-    const url = `https://image.pollinations.ai/prompt/book%20cover%20${keyword}?width=400&height=600&nologo=true`;
-    document.getElementById("bookFormImageStr").value = url;
-    updateImagePreview();
-    showToast("Đang tạo ảnh bằng AI... Quá trình này có thể mất vài giây để load ảnh.");
+    window.open(`https://www.pinterest.com/search/pins/?q=${keyword}`, '_blank');
+    showToast("Đã mở Pinterest! Hãy copy địa chỉ hình ảnh (Copy image address) bạn thích và dán vào ô URL nhé.");
   });
 
   document.getElementById("bookFormUploadBtn")?.addEventListener("click", () => {

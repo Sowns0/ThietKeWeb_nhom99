@@ -26,6 +26,20 @@ let SachController = class SachController {
     findAll() {
         return this.sachService.findAll();
     }
+    async scrapePinterest(q) {
+        try {
+            const response = await fetch(`https://www.pinterest.com/search/pins/?q=${encodeURIComponent(q)}`);
+            const html = await response.text();
+            const match = html.match(/https:\/\/i\.pinimg\.com\/[a-zA-Z0-9x]+\/[0-9a-f\/]+\.(?:jpg|png|jpeg|webp)/i);
+            if (match && match[0]) {
+                return { url: match[0] };
+            }
+            return { url: '' };
+        }
+        catch (e) {
+            return { url: '' };
+        }
+    }
     findOne(id) {
         return this.sachService.findOne(Number(id));
     }
@@ -46,6 +60,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], SachController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('scrape-pinterest'),
+    __param(0, (0, common_1.Query)('q')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SachController.prototype, "scrapePinterest", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

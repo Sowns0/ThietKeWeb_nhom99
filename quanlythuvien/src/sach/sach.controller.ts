@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Query } from '@nestjs/common';
 import { SachService } from './sach.service';
 import { CreateSachDto } from './dto/create-sach.dto';
 import { UpdateSachDto } from './dto/update-sach.dto';
@@ -12,6 +12,21 @@ export class SachController {
   @Get()
   findAll() {
     return this.sachService.findAll();
+  }
+
+  @Get('scrape-pinterest')
+  async scrapePinterest(@Query('q') q: string) {
+    try {
+      const response = await fetch(`https://www.pinterest.com/search/pins/?q=${encodeURIComponent(q)}`);
+      const html = await response.text();
+      const match = html.match(/https:\/\/i\.pinimg\.com\/[a-zA-Z0-9x]+\/[0-9a-f\/]+\.(?:jpg|png|jpeg|webp)/i);
+      if (match && match[0]) {
+        return { url: match[0] };
+      }
+      return { url: '' };
+    } catch (e) {
+      return { url: '' };
+    }
   }
 
   @Get(':id')
