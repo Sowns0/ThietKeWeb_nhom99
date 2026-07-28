@@ -1268,18 +1268,19 @@
 
 <body>
 
-<!-- ================= LOGIN GATE ================= -->
-<section class="auth-page" id="loginView">
-  <div class="auth-page__visual">
-    <a href="#" class="auth-brand">
-      <span class="auth-brand__mark" style="background: transparent; padding: 0;">
-        <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/10/Icon-CTy-Tap-doan-Phuong-Hoan.png" alt="Phenikaa Logo" style="width: 100%; height: 100%; object-fit: contain;" />
-      </span>
-      <span>
-        <strong>Thư viện số Phenikaa University</strong>
-        <small>Library Portal</small>
-      </span>
-    </a>
+  <!-- ================= LOGIN GATE ================= -->
+  <section class="auth-page" id="loginView">
+    <div class="auth-page__visual">
+      <a href="#" class="auth-brand">
+        <span class="auth-brand__mark" style="background: transparent; padding: 0;">
+          <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/10/Icon-CTy-Tap-doan-Phuong-Hoan.png"
+            alt="Phenikaa Logo" style="width: 100%; height: 100%; object-fit: contain;" />
+        </span>
+        <span>
+          <strong>Thư viện số Phenikaa University</strong>
+          <small>Library Portal</small>
+        </span>
+      </a>
 
       <div class="auth-intro">
         <span class="auth-badge">Nội bộ thủ thư</span>
@@ -1325,22 +1326,25 @@
 
     <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar__head">
-      <div class="brand">
-        <div class="brand__mark" style="background: transparent; padding: 0; width: 40px; height: 40px;">
-          <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/10/Icon-CTy-Tap-doan-Phuong-Hoan.png" alt="Phenikaa Logo" style="width: 100%; height: 100%; object-fit: contain;" />
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__head">
+        <div class="brand">
+          <div class="brand__mark" style="background: transparent; padding: 0; width: 40px; height: 40px;">
+            <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/10/Icon-CTy-Tap-doan-Phuong-Hoan.png"
+              alt="Phenikaa Logo" style="width: 100%; height: 100%; object-fit: contain;" />
+          </div>
+          <div class="brand__text">
+            <strong>Thư viện số Phenikaa University</strong>
+            <small>Library Portal</small>
+          </div>
         </div>
-        <div class="brand__text">
-          <strong>Thư viện số Phenikaa University</strong>
-          <small>Library Portal</small>
-        </div>
+        <button class="sidebar-close" onclick="closeSidebar()" aria-label="Đóng menu">
+          <svg class="icon" viewBox="0 0 24 24" width="20" height="20">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <button class="sidebar-close" onclick="closeSidebar()" aria-label="Đóng menu">
-        <svg class="icon" viewBox="0 0 24 24" width="20" height="20"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
 
       <p class="nav-label">Chức năng</p>
 
@@ -1538,12 +1542,16 @@
       <section class="panel is-hidden" id="panelDocGia">
         <div class="panel__head">
           <h1>Quản lý Độc giả</h1>
-          <button class="btn-primary" id="docGiaAddBtn" onclick="alert('Chức năng thêm ở Bước 2')">Thêm Độc giả</button>
+          <button class="btn-primary" id="docGiaAddBtn" onclick="openDocGiaForm()">Thêm Độc giả</button>
         </div>
         <div class="filter-row">
           <div class="field grow">
-            <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="text" id="docGiaSearchInput" placeholder="Tìm độc giả theo tên, sđt, email..." oninput="renderDocGiaTable()" />
+            <svg class="icon" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input type="text" id="docGiaSearchInput" placeholder="Tìm độc giả theo tên, sđt, email..."
+              oninput="renderDocGiaTable()" />
           </div>
         </div>
         <div class="loan-layout" style="padding-top: 0;">
@@ -1559,7 +1567,9 @@
                 </tr>
               </thead>
               <tbody id="docGiaTableBody">
-                <tr><td colspan="5" class="empty-state">Đang tải danh sách...</td></tr>
+                <tr>
+                  <td colspan="5" class="empty-state">Đang tải danh sách...</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1633,6 +1643,7 @@
       bindBookModalEvents();
       bindNavEvents();
       bindLoanEvents();
+      bindDocGiaEvents();
       restoreRememberedUsername();
     });
 
@@ -2675,7 +2686,7 @@
       let filteredList = currentDocGiaList || [];
       if (searchInput && searchInput.value) {
         const query = searchInput.value.toLowerCase();
-        filteredList = filteredList.filter(dg => 
+        filteredList = filteredList.filter(dg =>
           (dg.ho_ten && dg.ho_ten.toLowerCase().includes(query)) ||
           (dg.so_dien_thoai && dg.so_dien_thoai.includes(query)) ||
           (dg.email && dg.email.toLowerCase().includes(query))
@@ -2699,6 +2710,62 @@
           </td>
         </tr>
       `).join("");
+    }
+
+    /* Thêm Độc giả Logic */
+    function openDocGiaForm() {
+      document.getElementById('docGiaFormName').value = '';
+      document.getElementById('docGiaFormPhone').value = '';
+      document.getElementById('docGiaFormEmail').value = '';
+      document.getElementById('docGiaFormError').classList.add('is-hidden');
+      document.getElementById('docGiaFormBackdrop').classList.add('show');
+    }
+
+    function closeDocGiaForm() {
+      document.getElementById('docGiaFormBackdrop').classList.remove('show');
+    }
+
+    function bindDocGiaEvents() {
+      document.getElementById('docGiaFormClose').addEventListener('click', closeDocGiaForm);
+      document.getElementById('docGiaFormCancelBtn').addEventListener('click', closeDocGiaForm);
+      
+      document.getElementById('docGiaForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('docGiaFormSubmitBtn');
+        const err = document.getElementById('docGiaFormError');
+        
+        const ho_ten = document.getElementById('docGiaFormName').value.trim();
+        const so_dien_thoai = document.getElementById('docGiaFormPhone').value.trim();
+        const email = document.getElementById('docGiaFormEmail').value.trim();
+
+        if (!ho_ten) {
+          err.textContent = "Vui lòng nhập họ tên";
+          err.classList.remove('is-hidden');
+          return;
+        }
+
+        try {
+          btn.disabled = true;
+          btn.textContent = "Đang xử lý...";
+          err.classList.add('is-hidden');
+
+          await fetchJson("/doc-gia", {
+            method: "POST",
+            body: { ho_ten, so_dien_thoai, email }
+          });
+
+          closeDocGiaForm();
+          showToast("Đã thêm độc giả thành công");
+          await loadDocGiaList();
+          renderDocGiaTable();
+        } catch (error) {
+          err.textContent = toFriendlyMessage(error);
+          err.classList.remove('is-hidden');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Thêm độc giả";
+        }
+      });
     }
   </script>
   <div class="book-modal-backdrop" id="bookModalBackdrop">
@@ -2831,6 +2898,33 @@
         <button type="button" class="btn-ghost" id="deleteConfirmCancel">Hủy</button>
         <button type="button" class="btn-danger" id="deleteConfirmSubmit">Xóa sách</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Popup Form Thêm Độc giả -->
+  <div class="book-modal-backdrop" id="docGiaFormBackdrop">
+    <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true" style="max-width: 400px;">
+      <button type="button" class="book-modal__close" id="docGiaFormClose" aria-label="Đóng">&times;</button>
+      <h3>Thêm độc giả mới</h3>
+      <form id="docGiaForm" class="loan-confirm__body" style="margin-top: 16px;">
+        <label class="auth-field" style="margin-bottom: 12px; display: block;">
+          <span style="display: block; margin-bottom: 4px;">Họ và tên <span style="color: red;">*</span></span>
+          <input type="text" id="docGiaFormName" placeholder="Ví dụ: Nguyễn Văn A" required style="width: 100%; box-sizing: border-box;" />
+        </label>
+        <label class="auth-field" style="margin-bottom: 12px; display: block;">
+          <span style="display: block; margin-bottom: 4px;">Số điện thoại</span>
+          <input type="tel" id="docGiaFormPhone" placeholder="Ví dụ: 0987654321" style="width: 100%; box-sizing: border-box;" />
+        </label>
+        <label class="auth-field" style="margin-bottom: 12px; display: block;">
+          <span style="display: block; margin-bottom: 4px;">Email</span>
+          <input type="email" id="docGiaFormEmail" placeholder="Ví dụ: anv@phenikaa-uni.edu.vn" style="width: 100%; box-sizing: border-box;" />
+        </label>
+        <p class="loan-confirm__error is-hidden" id="docGiaFormError"></p>
+        <div class="loan-confirm__actions" style="margin-top: 20px;">
+          <button type="button" class="btn-ghost" id="docGiaFormCancelBtn">Hủy</button>
+          <button type="submit" class="btn-primary" id="docGiaFormSubmitBtn">Thêm độc giả</button>
+        </div>
+      </form>
     </div>
   </div>
 </body>
