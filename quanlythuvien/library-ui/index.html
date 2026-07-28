@@ -267,21 +267,23 @@
       font-weight: 500;
       margin-bottom: 2px;
       border-left: 3px solid transparent;
+      transition: all 0.2s ease;
     }
 
-    .nav-item:hover {
-      background: var(--navy-800);
-      color: #fff;
+    .nav-item .icon {
+      transition: color 0.2s ease;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: #f37021;
+    }
+
+    .nav-item:hover .icon, .nav-item.active .icon {
+      color: #f37021;
     }
 
     .nav-item.active {
-      background: var(--navy-800);
-      color: #fff;
-      border-left-color: var(--amber-500);
-    }
-
-    .nav-item.active .icon {
-      color: var(--amber-500);
+      border-left-color: #f37021;
     }
 
     .sidebar__footer {
