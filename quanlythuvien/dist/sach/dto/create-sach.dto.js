@@ -17,6 +17,7 @@ class CreateSachDto {
     the_loai;
     nam_xuat_ban;
     so_luong;
+    hinh_anh;
 }
 exports.CreateSachDto = CreateSachDto;
 __decorate([
@@ -44,4 +45,9 @@ __decorate([
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateSachDto.prototype, "so_luong", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateSachDto.prototype, "hinh_anh", void 0);
 //# sourceMappingURL=create-sach.dto.js.map

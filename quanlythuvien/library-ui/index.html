@@ -497,9 +497,12 @@
 
         <div class="panel__head">
           <h1>Kho sách</h1>
-          <button class="icon-btn" aria-label="Trợ giúp">
-            <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>
-          </button>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-primary" id="addBookBtn">Thêm sách mới</button>
+            <button class="icon-btn" aria-label="Trợ giúp">
+              <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="filter-row">
@@ -912,6 +915,10 @@ function renderBookGrid(sachList) {
     const cover = status === "available" ? "\ud83d\udcd7" : "\ud83d\udcd5";
     const spine = status === "available" ? "#3F7A5D" : "#A6432B";
 
+    const coverHtml = sach.hinh_anh 
+      ? `<img src="${escapeHtml(sach.hinh_anh)}" alt="Cover" style="width:100%; height:100%; object-fit:cover; border-radius:9px;" />` 
+      : cover;
+
     const card = document.createElement("article");
     card.className = "book-card";
     card.style.setProperty("--spine", spine);
@@ -923,7 +930,7 @@ function renderBookGrid(sachList) {
 
     card.innerHTML = `
       <div class="book-card__top">
-        <div class="book-card__cover">${cover}</div>
+        <div class="book-card__cover">${coverHtml}</div>
         <span class="stamp ${stampClass}">${stampLabel}</span>
       </div>
       <h3>${escapeHtml(sach.ten_sach)}</h3>
@@ -936,7 +943,11 @@ function renderBookGrid(sachList) {
       </div>
       <div class="book-card__foot">
         <span class="book-card__qty">${soLuong} quyen</span>
-        <a href="#" class="book-card__link">Xem chi tiet -&gt;</a>
+        <div style="display:flex; gap:8px;">
+          <a href="#" class="book-card__link" title="Xem chi tiết">Xem</a>
+          <button type="button" class="btn-ghost edit-book-btn" data-id="${sach.id}" style="padding:2px 6px; font-size:12px; height:auto;">Sửa</button>
+          <button type="button" class="btn-ghost delete-book-btn" data-id="${sach.id}" style="padding:2px 6px; font-size:12px; height:auto; color:var(--stamp-borrowed); border-color:var(--stamp-borrowed);">Xóa</button>
+        </div>
       </div>
     `;
     grid.appendChild(card);
@@ -998,18 +1009,59 @@ function bindBookModalEvents() {
     if (event.target === backdrop) closeBookModal();
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeBookModal();
+    if (event.key === "Escape") {
+      closeBookModal();
+      closeBookForm();
+      closeDeleteConfirm();
+    }
   });
 
   grid?.addEventListener("click", (event) => {
     const link = event.target.closest(".book-card__link");
-    if (!link) return;
-    event.preventDefault();
-    const card = link.closest(".book-card");
-    const sachId = card?.dataset.sachId;
-    const sach = currentSachList.find((item) => String(item.id) === String(sachId));
-    if (sach) openBookModal(sach);
+    const editBtn = event.target.closest(".edit-book-btn");
+    const deleteBtn = event.target.closest(".delete-book-btn");
+
+    if (link) {
+      event.preventDefault();
+      const card = link.closest(".book-card");
+      const sachId = card?.dataset.sachId;
+      const sach = currentSachList.find((item) => String(item.id) === String(sachId));
+      if (sach) openBookModal(sach);
+    } else if (editBtn) {
+      event.preventDefault();
+      const sachId = editBtn.dataset.id;
+      const sach = currentSachList.find((item) => String(item.id) === String(sachId));
+      if (sach) openBookForm(sach);
+    } else if (deleteBtn) {
+      event.preventDefault();
+      const sachId = deleteBtn.dataset.id;
+      openDeleteConfirm(sachId);
+    }
   });
+
+  // Book form events
+  document.getElementById("addBookBtn")?.addEventListener("click", () => openBookForm());
+  document.getElementById("bookFormClose")?.addEventListener("click", closeBookForm);
+  document.getElementById("bookFormCancelBtn")?.addEventListener("click", closeBookForm);
+  document.getElementById("bookFormBackdrop")?.addEventListener("click", (event) => {
+    if (event.target.id === "bookFormBackdrop") closeBookForm();
+  });
+  document.getElementById("bookForm")?.addEventListener("submit", submitBookForm);
+
+  // Image upload
+  document.getElementById("bookFormUploadBtn")?.addEventListener("click", () => {
+    document.getElementById("bookFormFile")?.click();
+  });
+  document.getElementById("bookFormFile")?.addEventListener("change", handleImageUpload);
+  document.getElementById("bookFormImageStr")?.addEventListener("input", updateImagePreview);
+
+  // Delete confirm events
+  document.getElementById("deleteConfirmClose")?.addEventListener("click", closeDeleteConfirm);
+  document.getElementById("deleteConfirmCancel")?.addEventListener("click", closeDeleteConfirm);
+  document.getElementById("deleteConfirmBackdrop")?.addEventListener("click", (event) => {
+    if (event.target.id === "deleteConfirmBackdrop") closeDeleteConfirm();
+  });
+  document.getElementById("deleteConfirmSubmit")?.addEventListener("click", submitDeleteConfirm);
 }
 
 function openBookModal(sach) {
@@ -1017,7 +1069,11 @@ function openBookModal(sach) {
   const status = soLuong > 0 ? "Con hang" : "Het hang";
   const cover = soLuong > 0 ? "\ud83d\udcd7" : "\ud83d\udcd5";
 
-  document.getElementById("bookModalCover").textContent = cover;
+  const coverHtml = sach.hinh_anh 
+    ? `<img src="${escapeHtml(sach.hinh_anh)}" style="width:100px; height:140px; object-fit:cover; border-radius:9px;" />` 
+    : cover;
+
+  document.getElementById("bookModalCover").innerHTML = coverHtml;
   document.getElementById("bookModalTitle").textContent = sach.ten_sach ?? "";
   document.getElementById("bookModalAuthor").textContent = sach.tac_gia ?? "";
   document.getElementById("bookModalGenre").textContent = sach.the_loai ?? "";
@@ -1030,6 +1086,138 @@ function openBookModal(sach) {
 
 function closeBookModal() {
   document.getElementById("bookModalBackdrop").classList.remove("show");
+}
+
+function openBookForm(sach = null) {
+  const form = document.getElementById("bookForm");
+  const title = document.getElementById("bookFormTitle");
+  const error = document.getElementById("bookFormError");
+  
+  form.reset();
+  error.classList.add("is-hidden");
+  error.textContent = "";
+
+  if (sach) {
+    title.textContent = "Sửa sách";
+    document.getElementById("bookFormId").value = sach.id;
+    document.getElementById("bookFormName").value = sach.ten_sach || "";
+    document.getElementById("bookFormAuthor").value = sach.tac_gia || "";
+    document.getElementById("bookFormGenre").value = sach.the_loai || "";
+    document.getElementById("bookFormYear").value = sach.nam_xuat_ban || "";
+    document.getElementById("bookFormQty").value = sach.so_luong || 0;
+    document.getElementById("bookFormImageStr").value = sach.hinh_anh || "";
+  } else {
+    title.textContent = "Thêm sách mới";
+    document.getElementById("bookFormId").value = "";
+    document.getElementById("bookFormQty").value = 1;
+  }
+  updateImagePreview();
+  document.getElementById("bookFormBackdrop").classList.add("show");
+}
+
+function closeBookForm() {
+  document.getElementById("bookFormBackdrop").classList.remove("show");
+}
+
+function updateImagePreview() {
+  const imageStr = document.getElementById("bookFormImageStr").value.trim();
+  const preview = document.getElementById("bookFormImagePreview");
+  if (imageStr) {
+    preview.innerHTML = `<img src="${escapeHtml(imageStr)}" style="width:100%; height:100%; object-fit:cover;" />`;
+  } else {
+    preview.innerHTML = `<span>Trống</span>`;
+  }
+}
+
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById("bookFormImageStr").value = e.target.result;
+    updateImagePreview();
+  };
+  reader.readAsDataURL(file);
+  event.target.value = "";
+}
+
+async function submitBookForm(event) {
+  event.preventDefault();
+  const btn = document.getElementById("bookFormSubmitBtn");
+  const errorEl = document.getElementById("bookFormError");
+  const id = document.getElementById("bookFormId").value;
+  
+  const payload = {
+    ten_sach: document.getElementById("bookFormName").value.trim(),
+    tac_gia: document.getElementById("bookFormAuthor").value.trim(),
+    the_loai: document.getElementById("bookFormGenre").value.trim(),
+    nam_xuat_ban: Number(document.getElementById("bookFormYear").value),
+    so_luong: Number(document.getElementById("bookFormQty").value),
+    hinh_anh: document.getElementById("bookFormImageStr").value.trim()
+  };
+
+  btn.disabled = true;
+  btn.textContent = "Đang lưu...";
+  errorEl.classList.add("is-hidden");
+
+  try {
+    if (id) {
+      await fetchJson(`/sach/${id}`, { method: "PUT", body: payload });
+      showToast("Cập nhật sách thành công!");
+    } else {
+      await fetchJson(`/sach`, { method: "POST", body: payload });
+      showToast("Thêm sách thành công!");
+    }
+    closeBookForm();
+    loadSachList();
+  } catch (error) {
+    console.error("Lỗi lưu sách:", error);
+    errorEl.textContent = toFriendlyMessage(error);
+    errorEl.classList.remove("is-hidden");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Lưu sách";
+  }
+}
+
+let pendingDeleteSachId = null;
+
+function openDeleteConfirm(id) {
+  const sach = currentSachList.find((item) => String(item.id) === String(id));
+  if (!sach) return;
+  pendingDeleteSachId = id;
+  document.getElementById("deleteConfirmSach").textContent = sach.ten_sach;
+  document.getElementById("deleteConfirmError").classList.add("is-hidden");
+  document.getElementById("deleteConfirmBackdrop").classList.add("show");
+}
+
+function closeDeleteConfirm() {
+  document.getElementById("deleteConfirmBackdrop").classList.remove("show");
+  pendingDeleteSachId = null;
+}
+
+async function submitDeleteConfirm() {
+  if (!pendingDeleteSachId) return;
+  const btn = document.getElementById("deleteConfirmSubmit");
+  const errorEl = document.getElementById("deleteConfirmError");
+
+  btn.disabled = true;
+  btn.textContent = "Đang xóa...";
+  errorEl.classList.add("is-hidden");
+
+  try {
+    await fetchJson(`/sach/${pendingDeleteSachId}`, { method: "DELETE" });
+    showToast("Xóa sách thành công!");
+    closeDeleteConfirm();
+    loadSachList();
+  } catch (error) {
+    console.error("Lỗi xóa sách:", error);
+    errorEl.textContent = toFriendlyMessage(error);
+    errorEl.classList.remove("is-hidden");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Xóa sách";
+  }
 }
 
 /* ========================================================================
@@ -1520,6 +1708,68 @@ async function submitCancelConfirm() {
     <div class="loan-confirm__actions">
       <button type="button" class="btn-ghost" id="cancelConfirmCancel">Không hủy</button>
       <button type="button" class="btn-danger" id="cancelConfirmSubmit">Xác nhận hủy</button>
+    </div>
+  </div>
+</div>
+<!-- Popup Form Thêm/Sửa Sách -->
+<div class="book-modal-backdrop" id="bookFormBackdrop">
+  <div class="book-modal" role="dialog" aria-modal="true" style="max-width: 500px;">
+    <button type="button" class="book-modal__close" id="bookFormClose" aria-label="Đóng">&times;</button>
+    <h3 id="bookFormTitle">Thêm sách mới</h3>
+    <form id="bookForm" style="margin-top: 16px;">
+      <input type="hidden" id="bookFormId" />
+      <label class="auth-field">
+        <span>Tên sách</span>
+        <input type="text" id="bookFormName" required />
+      </label>
+      <label class="auth-field">
+        <span>Tác giả</span>
+        <input type="text" id="bookFormAuthor" required />
+      </label>
+      <div style="display: flex; gap: 12px;">
+        <label class="auth-field" style="flex: 1;">
+          <span>Thể loại</span>
+          <input type="text" id="bookFormGenre" required />
+        </label>
+        <label class="auth-field" style="flex: 1;">
+          <span>Năm xuất bản</span>
+          <input type="number" id="bookFormYear" required min="1000" max="2100" />
+        </label>
+        <label class="auth-field" style="width: 80px;">
+          <span>Số lượng</span>
+          <input type="number" id="bookFormQty" required min="0" />
+        </label>
+      </div>
+      <label class="auth-field">
+        <span>Ảnh minh họa (Base64 hoặc URL)</span>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="bookFormImageStr" placeholder="Nhập URL hoặc chuỗi Base64..." style="flex: 1;" />
+          <button type="button" class="btn-ghost" id="bookFormUploadBtn" style="padding: 0 12px;">Tải file</button>
+          <input type="file" id="bookFormFile" accept="image/*" style="display: none;" />
+        </div>
+        <div id="bookFormImagePreview" style="margin-top: 8px; width: 60px; height: 80px; background: var(--line-200); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted-500);">
+          <span>Trống</span>
+        </div>
+      </label>
+      <p class="loan-confirm__error is-hidden" id="bookFormError"></p>
+      <div class="loan-confirm__actions">
+        <button type="button" class="btn-ghost" id="bookFormCancelBtn">Hủy</button>
+        <button type="submit" class="btn-primary" id="bookFormSubmitBtn">Lưu sách</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Popup xác nhận xóa sách -->
+<div class="book-modal-backdrop" id="deleteConfirmBackdrop">
+  <div class="book-modal loan-confirm-modal" role="dialog" aria-modal="true">
+    <button type="button" class="book-modal__close" id="deleteConfirmClose" aria-label="Đóng">&times;</button>
+    <h3>Xác nhận xóa sách</h3>
+    <p style="font-size: 14px; margin: 10px 0 16px;">Bạn có chắc chắn muốn xóa cuốn sách <strong id="deleteConfirmSach"></strong>? Hành động này không thể hoàn tác.</p>
+    <p class="loan-confirm__error is-hidden" id="deleteConfirmError"></p>
+    <div class="loan-confirm__actions">
+      <button type="button" class="btn-ghost" id="deleteConfirmCancel">Hủy</button>
+      <button type="button" class="btn-danger" id="deleteConfirmSubmit">Xóa sách</button>
     </div>
   </div>
 </div>

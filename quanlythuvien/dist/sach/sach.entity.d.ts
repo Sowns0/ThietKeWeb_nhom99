@@ -5,4 +5,5 @@ export declare class Sach {
     the_loai: string;
     nam_xuat_ban: number;
     so_luong: number;
+    hinh_anh: string;
 }

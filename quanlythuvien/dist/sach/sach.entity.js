@@ -18,6 +18,7 @@ let Sach = class Sach {
     the_loai;
     nam_xuat_ban;
     so_luong;
+    hinh_anh;
 };
 exports.Sach = Sach;
 __decorate([
@@ -44,6 +45,10 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Sach.prototype, "so_luong", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Sach.prototype, "hinh_anh", void 0);
 exports.Sach = Sach = __decorate([
     (0, typeorm_1.Entity)()
 ], Sach);

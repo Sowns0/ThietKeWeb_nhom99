@@ -19,4 +19,7 @@ export class Sach {
 
   @Column()
   so_luong: number;
+
+  @Column({ type: 'text', nullable: true })
+  hinh_anh: string;
 }

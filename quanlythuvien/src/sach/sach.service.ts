@@ -8,7 +8,7 @@ export class SachService {
   constructor(
     @InjectRepository(Sach)
     private sachRepository: Repository<Sach>,
-  ) {}
+  ) { }
 
   findAll() {
     return this.sachRepository.find();

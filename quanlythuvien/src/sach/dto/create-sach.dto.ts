@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsNotEmpty, Min } from 'class-validator';
+import { IsString, IsInt, IsNotEmpty, Min, IsOptional } from 'class-validator';
 
 export class CreateSachDto {
   @IsString()
@@ -20,4 +20,8 @@ export class CreateSachDto {
   @IsInt()
   @Min(0)
   so_luong: number;
+
+  @IsString()
+  @IsOptional()
+  hinh_anh?: string;
 }
