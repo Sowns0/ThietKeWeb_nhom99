@@ -1,6 +1,6 @@
 <div align="center">
   <img src="https://cdn.haitrieu.com/wp-content/uploads/2023/10/Icon-CTy-Tap-doan-Phuong-Hoan.png" alt="Phenikaa Logo" width="100"/>
-  <h1>Hệ Thống Quản Lý Thư Viện Số</h1>
+  <h1>Ứng dụng Quản Lý Thư Viện Tiến Hoàng Sơn</h1>
   <p>Đồ án kết thúc học phần: <strong>Lập trình Web Nâng cao</strong> - Đại học Phenikaa</p>
 </div>
 
