@@ -85,13 +85,6 @@ ThietKeWeb_nhom99/
 └── README.md               # Tài liệu dự án
 ```
 
-## 📸 Hình ảnh Demo
-
-*(Chèn thêm ảnh screenshot thực tế của dự án vào đây )*
-- **Màn hình Đăng nhập:** `![Login](./docs/login.png)`
-- **Kho sách:** `![Kho Sach](./docs/kho-sach.png)`
-- **Trợ lý Thống kê (Ctrl+K):** `![Quick Analytics](./docs/analytics.png)`
-
 ---
 <div align="center">
   <i>Đồ án được thực hiện với sự tâm huyết của Nhóm 99. Cảm ơn cô giáo đã hướng dẫn và hỗ trợ!</i>
